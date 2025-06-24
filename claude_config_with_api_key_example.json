@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "crypto-analysis": {
+      "command": "/path/to/CryptoAnalysisMCP/crypto-analysis-mcp",
+      "env": {
+        "COINPAPRIKA_API_KEY": "your-api-key-here"
+      }
+    }
+  }
+}

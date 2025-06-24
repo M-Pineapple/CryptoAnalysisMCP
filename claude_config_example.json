@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "crypto-analysis": {
+      "command": "/path/to/CryptoAnalysisMCP/crypto-analysis-mcp"
+    },
+    "other-mcp": {
+      "command": "/path/to/other-mcp"
+    }
+  }
+}

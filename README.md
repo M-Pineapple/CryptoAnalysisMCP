@@ -26,7 +26,7 @@ A Model Context Protocol (MCP) server for comprehensive cryptocurrency technical
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/CryptoAnalysisMCP.git
+git clone https://github.com/[your-username]/CryptoAnalysisMCP.git
 cd CryptoAnalysisMCP
 ```
 
@@ -168,7 +168,7 @@ export COINPAPRIKA_API_KEY="your-api-key"
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/CryptoAnalysisMCP.git
+git clone https://github.com/[your-username]/CryptoAnalysisMCP.git
 cd CryptoAnalysisMCP
 
 # Build debug version
@@ -244,3 +244,7 @@ If you encounter build errors:
 ## Support
 
 For issues, questions, or suggestions, please open an issue on GitHub.
+
+---
+
+Made with ❤️ by 🍍

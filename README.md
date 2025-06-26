@@ -13,6 +13,152 @@ A Model Context Protocol (MCP) server for comprehensive cryptocurrency technical
 - **Multi-timeframe Analysis**: 4-hour, daily, weekly, and monthly timeframes
 - **Risk-adjusted Strategies**: Conservative, moderate, and aggressive trading approaches
 
+## 🚀 Coming Soon
+
+We're actively working on exciting new features to make CryptoAnalysisMCP even more powerful:
+
+### 🆕 Next Release (v1.1.0)
+- **🌊 Elliott Wave Analysis**: Automated wave counting and prediction
+- **🕯️ Advanced Candlestick Patterns**: Three Black Crows, Three White Soldiers, Marubozu, and more
+- **📊 Portfolio Correlation Analysis**: Track how your holdings correlate with each other
+- **🔔 Custom Alert Conditions**: Set personalized alerts based on technical indicators
+- **📝 Trading Journal Integration**: Log and analyze your trades automatically
+- **🔄 CoinMarketCap API Support**: Switch between CoinPaprika and CoinMarketCap APIs seamlessly
+
+### 🔮 Future Enhancements
+- **🦎 CoinGecko API Integration**: Add support for CoinGecko as a third data source
+- **🤖 AI-Powered Predictions**: Machine learning models for price movement predictions
+- **🌐 Social Sentiment Analysis**: Integrate Twitter/Reddit sentiment data
+- **⛓️ On-chain Analytics**: DeFi metrics, whale movements, exchange flows
+- **📡 WebSocket Support**: Real-time price and indicator updates
+- **💱 Multi-exchange Support**: Aggregate data from multiple exchanges
+- **📊 Custom Indicator Builder**: Create your own technical indicators
+
+Want to suggest a feature? [Open an issue](https://github.com/M-Pineapple/CryptoAnalysisMCP/issues) on GitHub!
+
+## ❓ Frequently Asked Questions
+
+### Do I need a paid API key to use this MCP?
+
+**Short answer**: For basic daily timeframe analysis, no. For full functionality, yes.
+
+The free CoinPaprika API tier includes:
+- ✅ Real-time price data
+- ✅ 1 year of daily historical data
+- ✅ 25,000 API calls per month
+
+**However**, many advanced features require a [CoinPaprika Pro subscription](https://coinpaprika.com/api/):
+- ❌ 4-hour and hourly timeframes
+- ❌ Extended historical data (beyond 1 year)
+- ❌ Higher rate limits
+- ❌ Priority support
+
+For the best experience, we recommend getting a CoinPaprika Pro API key starting at $99/month.
+
+### Can I use CoinMarketCap or CoinGecko API instead?
+
+**Currently**: Not directly - this MCP is specifically built for CoinPaprika's API structure.
+
+**Coming in v1.1.0**: CoinMarketCap API support! 🎉
+
+Key differences:
+- **CoinMarketCap**: Different endpoint structure (support coming in v1.1.0!)
+- **CoinGecko**: Different data format (planned for future release)
+- **CoinPaprika**: Best coverage (71,000+ assets vs 10,000-20,000 for competitors)
+
+We chose CoinPaprika first because:
+- 3x more market coverage than competitors
+- More generous free tier
+- Better historical data access
+- Superior API reliability (99.9% uptime)
+
+Once v1.1.0 is released, you'll be able to switch between CoinPaprika and CoinMarketCap APIs with a simple configuration change!
+
+### What cryptocurrencies are supported?
+
+All 2,500+ cryptocurrencies available on CoinPaprika! This includes:
+- Major coins (BTC, ETH, SOL, etc.)
+- Meme coins (DOGE, SHIB, PEPE, etc.)
+- DeFi tokens (UNI, AAVE, etc.)
+- Layer 2 tokens (ARB, OP, MATIC, etc.)
+- Any new listings on CoinPaprika
+
+Just use the ticker symbol - the MCP handles the rest!
+
+### Why am I getting 402 Payment Required errors?
+
+This means you're trying to access paid features with a free API key:
+- Using 4h or hourly timeframes (free tier only supports daily)
+- Requesting data older than 1 year
+- Exceeding rate limits
+
+**Solution**: Either use daily timeframe or [upgrade to CoinPaprika Pro](https://coinpaprika.com/api/).
+
+### How accurate are the trading signals?
+
+⚠️ **Important**: Trading signals are for informational purposes only!
+
+- Based on well-established technical indicators
+- No prediction is 100% accurate
+- Always do your own research
+- Never invest more than you can afford to lose
+- Consider multiple factors beyond technical analysis
+
+### Can I use this for automated trading?
+
+While technically possible, we **strongly advise caution**:
+- This MCP provides analysis, not execution
+- Requires additional safety mechanisms
+- Needs proper risk management
+- Should be thoroughly backtested
+- Consider paper trading first
+
+### How often does the data update?
+
+Depends on your API tier:
+- **Free tier**: ~1-5 minute delays
+- **Pro tier**: 30-second updates for prices
+- **Cached locally**: 1-5 minutes to reduce API calls
+
+### Is my API key secure?
+
+Yes! Your API key:
+- Is never hardcoded
+- Only read from environment variables
+- Never logged or transmitted
+- Only used for CoinPaprika API calls
+- Follows security best practices
+
+### Can I contribute to this project?
+
+Absolutely! We welcome contributions:
+- Bug fixes
+- New indicators
+- Performance improvements
+- Documentation updates
+- Feature suggestions
+
+See our [Contributing](#contributing) section for guidelines.
+
+### Where can I get help?
+
+1. Check this FAQ first
+2. Read the [documentation](https://github.com/M-Pineapple/CryptoAnalysisMCP)
+3. Search [existing issues](https://github.com/M-Pineapple/CryptoAnalysisMCP/issues)
+4. Open a new issue with details
+5. Join our community discussions
+
+### Why Swift instead of Python/JavaScript?
+
+Swift offers:
+- Native macOS performance
+- Type safety and modern concurrency
+- Excellent memory management
+- Seamless Claude Desktop integration
+- Growing ecosystem for server-side development
+
+Plus, we love Swift! 🍍
+
 ## Prerequisites
 
 - macOS 10.15 or later

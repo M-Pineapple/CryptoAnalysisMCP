@@ -241,6 +241,20 @@ If you encounter build errors:
 2. Clean the build: `swift package clean`
 3. Update dependencies: `swift package update`
 
+## 💖 Support This Project
+
+If CryptoAnalysisMCP has helped enhance your crypto analysis workflow or saved you time with technical indicators, consider supporting its development:
+
+<a href="https://www.buymeacoffee.com/mpineapple" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+
+Your support helps me:
+* Maintain and improve CryptoAnalysisMCP with new features
+* Keep the project open-source and free for everyone
+* Dedicate more time to addressing user requests and bug fixes
+* Explore new indicators and analysis techniques
+
+Thank you for considering supporting my work! 🙏
+
 ## Support
 
 For issues, questions, or suggestions, please open an issue on GitHub.

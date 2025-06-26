@@ -35,6 +35,9 @@ crypto-analysis-mcp
 ehthumbs.db
 Thumbs.db
 
+# Reddit draft (temporary)
+reddit-post-draft.md
+
 # Test outputs
 test_output/
 coverage/

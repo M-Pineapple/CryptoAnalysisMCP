@@ -20,6 +20,8 @@ A Model Context Protocol (MCP) server for comprehensive cryptocurrency technical
   - 🚀 Early token hunters
   - 📊 Anyone tracking obscure tokens
 
+🐦 **Follow [@m_pineapple__](https://x.com/m_pineapple__) for updates!**
+
 ### 🔧 New Liquidity & DEX Tools
 - **get_token_liquidity**: Track liquidity across all DEXes for any token
 - **search_tokens_by_network**: Find tokens on specific blockchains
@@ -682,6 +684,12 @@ Thank you for considering supporting my work! 🙏
 ## Support
 
 For issues, questions, or suggestions, please open an issue on GitHub.
+
+## Connect
+
+Follow me for updates and crypto analysis insights:
+- 🐦 Twitter/X: [@m_pineapple__](https://x.com/m_pineapple__)
+- 🐙 GitHub: [@M-Pineapple](https://github.com/M-Pineapple)
 
 ---
 

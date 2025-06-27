@@ -4,6 +4,8 @@ A Model Context Protocol (MCP) server for comprehensive cryptocurrency technical
 
 ## Features
 
+> 💡 **Not sure what to ask?** Check our [**Crypto Analysis Prompts Guide**](./PROMPTS.md) for inspiration!
+
 - **Dynamic Symbol Resolution**: Automatically supports all 2,500+ cryptocurrencies on CoinPaprika
 - **Real-time Price Data**: Current prices, volume, market cap, and percentage changes
 - **Technical Indicators**: RSI, MACD, Moving Averages, Bollinger Bands, and more
@@ -40,20 +42,49 @@ Want to suggest a feature? [Open an issue](https://github.com/M-Pineapple/Crypto
 
 ### Do I need a paid API key to use this MCP?
 
-**Short answer**: For basic daily timeframe analysis, no. For full functionality, yes.
+**Short answer**: You need a FREE API key for most features. Paid key for advanced timeframes.
 
-The free CoinPaprika API tier includes:
-- ✅ Real-time price data
-- ✅ 1 year of daily historical data
+**What works WITHOUT any API key:**
+- ✅ Real-time price data (get_crypto_price)
+- ✅ Market cap, volume, 24h changes
+- ✅ Price percentage changes (15m, 30m, 1h, 6h, 12h, 24h, 7d, 30d, 1y)
+
+**What requires a FREE CoinPaprika API key:**
+- 🔑 Technical indicators (RSI, MACD, Bollinger Bands)
+- 🔑 Chart pattern detection
+- 🔑 Support & resistance levels
+- 🔑 Trading signals
+- 🔑 Multi-timeframe analysis
+
+**How to get your FREE API key:**
+1. Go to [CoinPaprika API](https://coinpaprika.com/api/)
+2. Click "Start Free" 
+3. Register for an account
+4. Get your API key
+5. Add to Claude Desktop config:
+```json
+{
+  "mcpServers": {
+    "crypto-analysis": {
+      "command": "/path/to/crypto-analysis-mcp",
+      "env": {
+        "COINPAPRIKA_API_KEY": "your-free-api-key-here"
+      }
+    }
+  }
+}
+```
+
+The free tier includes:
 - ✅ 25,000 API calls per month
+- ✅ 1 year of daily historical data
+- ✅ 2,500+ cryptocurrencies
 
-**However**, many advanced features require a [CoinPaprika Pro subscription](https://coinpaprika.com/api/):
-- ❌ 4-hour and hourly timeframes
-- ❌ Extended historical data (beyond 1 year)
+**For advanced features**, upgrade to [CoinPaprika Pro](https://coinpaprika.com/api/):
+- ❌ 4-hour and hourly timeframes (Pro required)
+- ❌ Extended historical data beyond 1 year
 - ❌ Higher rate limits
 - ❌ Priority support
-
-For the best experience, we recommend getting a CoinPaprika Pro API key starting at $99/month.
 
 ### Can I use CoinMarketCap or CoinGecko API instead?
 
@@ -168,6 +199,13 @@ Plus, we love Swift! 🍍
 
 ## Installation
 
+### Prerequisites
+
+1. **Get a FREE CoinPaprika API Key** (required for technical analysis):
+   - Visit [CoinPaprika API](https://coinpaprika.com/api/)
+   - Click "Start Free" and register
+   - Copy your API key for step 3
+
 ### Quick Install
 
 1. Clone the repository:
@@ -186,7 +224,10 @@ cd CryptoAnalysisMCP
 {
   "mcpServers": {
     "crypto-analysis": {
-      "command": "/path/to/CryptoAnalysisMCP/crypto-analysis-mcp"
+      "command": "/path/to/CryptoAnalysisMCP/crypto-analysis-mcp",
+      "env": {
+        "COINPAPRIKA_API_KEY": "your-free-api-key-here"
+      }
     }
   }
 }
@@ -212,6 +253,18 @@ Then use this in Claude Desktop config:
 ```
 
 ## Usage
+
+### 📝 Example Prompts
+
+**New to crypto analysis?** Check out our comprehensive [**Crypto Analysis Prompts Guide**](./PROMPTS.md) with 100+ example prompts for:
+- 🏃 Day Trading
+- 📊 Swing Trading
+- 💼 Long-term Investing
+- 📈 Technical Indicators
+- 🎯 Risk Management
+- And much more!
+
+### Available Commands
 
 Once configured, you can use these commands in Claude:
 
@@ -264,6 +317,56 @@ crypto-analysis:multi_timeframe_analysis
   symbol: "AVAX"
 ```
 
+## 💡 Quick Examples
+
+Here are some natural language prompts you can use:
+
+**1. Quick Analysis**
+```
+"Give me a quick technical analysis of [SYMBOL]"
+"Is [SYMBOL] bullish or bearish right now?"
+"What's the trend for [SYMBOL]?"
+```
+
+**2. Day Trading Focus**
+```
+"Analyze [SYMBOL] for day trading opportunities"
+"Show me scalping levels for [SYMBOL] today"
+"What are the intraday support and resistance for [SYMBOL]?"
+```
+
+**3. Swing Trading Analysis**
+```
+"Provide swing trading setup for [SYMBOL] with 3-7 day outlook"
+"Analyze [SYMBOL] patterns on daily timeframe for swing trades"
+"Give me entry, stop loss, and targets for swing trading [SYMBOL]"
+```
+
+**4. Full Institutional Analysis**
+```
+"Do a complete Wall Street analyst report on [SYMBOL]"
+"Analyze [SYMBOL] like a hedge fund would"
+"Give me all technical indicators, patterns, and signals for [SYMBOL]"
+```
+
+**5. Risk-Based Strategies**
+```
+"Show me conservative trading strategy for [SYMBOL]"
+"What's the aggressive play on [SYMBOL]?"
+"Give me risk-adjusted entries for [SYMBOL]"
+```
+
+**6. Specific Indicator Requests**
+```
+"What's the RSI and MACD saying about [SYMBOL]?"
+"Check Bollinger Bands squeeze on [SYMBOL]"
+"Are there any chart patterns forming on [SYMBOL]?"
+```
+
+💡 **Replace [SYMBOL] with any cryptocurrency ticker** (BTC, ETH, SOL, etc.)
+
+👉 **See 100+ more examples in our [Crypto Analysis Prompts Guide](./PROMPTS.md)**
+
 ## Supported Cryptocurrencies
 
 The MCP now supports **ALL cryptocurrencies** available on CoinPaprika through dynamic symbol resolution. Just use the ticker symbol (e.g., BTC, ETH, DOGE, SHIB, PEPE, etc.).
@@ -272,28 +375,49 @@ Common symbols are cached for performance, while any other symbol is dynamically
 
 ## Configuration
 
-### API Key (Optional)
+### API Key (Required for Technical Analysis)
 
-For higher rate limits and access to premium features, you can add a CoinPaprika API key:
+⚠️ **Important**: While real-time prices work without an API key, all technical analysis features require at least a FREE CoinPaprika API key.
 
-1. Set environment variable:
-```bash
-export COINPAPRIKA_API_KEY="your-api-key"
-```
+#### Get your FREE API key:
 
-2. Or add to Claude Desktop config:
+1. Visit [CoinPaprika API](https://coinpaprika.com/api/)
+2. Click "Start Free"
+3. Create an account
+4. Copy your API key
+
+#### Add to Claude Desktop:
+
+**Option 1 - Environment Variable (Recommended):**
 ```json
 {
   "mcpServers": {
     "crypto-analysis": {
       "command": "/path/to/crypto-analysis-mcp",
       "env": {
-        "COINPAPRIKA_API_KEY": "your-api-key"
+        "COINPAPRIKA_API_KEY": "your-api-key-here"
       }
     }
   }
 }
 ```
+
+**Option 2 - System Environment:**
+```bash
+export COINPAPRIKA_API_KEY="your-api-key-here"
+```
+
+### Free vs Paid Tiers
+
+| Feature | No API Key | Free API Key | Pro API Key ($99/mo) |
+|---------|------------|--------------|---------------------|
+| Real-time prices | ✅ | ✅ | ✅ |
+| Technical indicators | ❌ | ✅ Daily only | ✅ All timeframes |
+| Chart patterns | ❌ | ✅ Daily only | ✅ All timeframes |
+| Trading signals | ❌ | ✅ Daily only | ✅ All timeframes |
+| Historical data | ❌ | ✅ 1 year | ✅ Full history |
+| Timeframes | - | Daily only | 5m, 15m, 30m, 1h, 4h, daily, weekly |
+| API calls/month | - | 25,000 | 500,000+ |
 
 ## Timeframes
 

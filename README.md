@@ -1,15 +1,31 @@
 ![image](https://github.com/user-attachments/assets/5322afe3-6c1c-4708-a68f-0ba0350a7125)
-# CryptoAnalysisMCP
+# CryptoAnalysisMCP v1.1 🚀
 
-A Model Context Protocol (MCP) server for comprehensive cryptocurrency technical analysis. Built with Swift, it provides real-time price data, technical indicators, chart pattern detection, and trading signals for over 2,500 cryptocurrencies.
+**NEW: Now supports 7+ MILLION tokens through DexPaprika integration!** 🎉
+
+A Model Context Protocol (MCP) server for comprehensive cryptocurrency technical analysis. Built with Swift, it provides real-time price data, technical indicators, chart pattern detection, and trading signals for over 7 million cryptocurrencies - from Bitcoin to the newest meme coin on any DEX!
 
 ⚠️ **IMPORTANT FOR DAY TRADERS**: This tool requires a $99/mo Pro subscription for intraday analysis. The free tier only supports daily candles, making it suitable for swing traders and long-term investors only.
+
+## 🆕 What's New in v1.1
+
+### 🌟 DexPaprika Integration - 7+ MILLION Tokens!
+- **NO API KEY REQUIRED** for basic price data on ANY token
+- Access to **every token on every DEX** across 23+ blockchains
+- Automatic fallback: CoinPaprika → DexPaprika
+- Analyze that meme coin that launched 5 minutes ago!
+- Perfect for:
+  - 🐸 Meme coin traders
+  - 🦄 DeFi degens
+  - 🚀 Early token hunters
+  - 📊 Anyone tracking obscure tokens
 
 ## Features
 
 > 💡 **Not sure what to ask?** Check our [**Crypto Analysis Prompts Guide**](./PROMPTS.md) for inspiration!
 
-- **Dynamic Symbol Resolution**: Automatically supports all 2,500+ cryptocurrencies on CoinPaprika
+- **🆕 Universal Token Support**: 7+ MILLION tokens through DexPaprika integration
+- **Dynamic Symbol Resolution**: Automatically supports all cryptocurrencies
 - **Real-time Price Data**: Current prices, volume, market cap, and percentage changes
 - **Technical Indicators**: RSI, MACD, Moving Averages, Bollinger Bands, and more
 - **Chart Pattern Detection**: Head & shoulders, triangles, double tops/bottoms
@@ -22,7 +38,7 @@ A Model Context Protocol (MCP) server for comprehensive cryptocurrency technical
 
 We're actively working on exciting new features to make CryptoAnalysisMCP even more powerful:
 
-### 🆕 Next Release (v1.1.0)
+### 🆕 Next Release (v1.2.0)
 - **🌊 Elliott Wave Analysis**: Automated wave counting and prediction
 - **🕯️ Advanced Candlestick Patterns**: Three Black Crows, Three White Soldiers, Marubozu, and more
 - **📊 Portfolio Correlation Analysis**: Track how your holdings correlate with each other
@@ -56,6 +72,7 @@ Want to suggest a feature? [Open an issue](https://github.com/M-Pineapple/Crypto
 - ✅ Long-term investment analysis
 - ✅ All technical indicators on DAILY timeframe
 - ✅ 1 year of daily historical data
+- 🆕 Basic price data for 7+ MILLION tokens via DexPaprika
 
 **What REQUIRES a Pro API key ($99/mo):**
 - ❌ Day trading (you need hourly/4h data)
@@ -99,10 +116,10 @@ The free tier includes:
 
 **Currently**: Not directly - this MCP is specifically built for CoinPaprika's API structure.
 
-**Coming in v1.1.0**: CoinMarketCap API support! 🎉
+**Coming in v1.2.0**: CoinMarketCap API support! 🎉
 
 Key differences:
-- **CoinMarketCap**: Different endpoint structure (support coming in v1.1.0!)
+- **CoinMarketCap**: Different endpoint structure (support coming in v1.2.0!)
 - **CoinGecko**: Different data format (planned for future release)
 - **CoinPaprika**: Best coverage (71,000+ assets vs 10,000-20,000 for competitors)
 
@@ -112,18 +129,27 @@ We chose CoinPaprika first because:
 - Better historical data access
 - Superior API reliability (99.9% uptime)
 
-Once v1.1.0 is released, you'll be able to switch between CoinPaprika and CoinMarketCap APIs with a simple configuration change!
+Once v1.2.0 is released, you'll be able to switch between CoinPaprika and CoinMarketCap APIs with a simple configuration change!
 
 ### What cryptocurrencies are supported?
 
-All 2,500+ cryptocurrencies available on CoinPaprika! This includes:
-- Major coins (BTC, ETH, SOL, etc.)
-- Meme coins (DOGE, SHIB, PEPE, etc.)
-- DeFi tokens (UNI, AAVE, etc.)
-- Layer 2 tokens (ARB, OP, MATIC, etc.)
-- Any new listings on CoinPaprika
+**🆕 v1.1: Now supports 7+ MILLION tokens!**
 
-Just use the ticker symbol - the MCP handles the rest!
+With our new DexPaprika integration:
+- ✅ **All 2,500+ CoinPaprika tokens** (major coins with full analysis)
+- ✅ **7+ MILLION DEX tokens** via DexPaprika (automatic fallback)
+- ✅ **Every token on every DEX** across 23+ blockchains
+- ✅ **Brand new tokens** - analyze tokens minutes after launch
+- ✅ **Obscure meme coins** - if it trades on a DEX, we have it
+- ✅ **NO API KEY NEEDED** for basic price data
+
+Examples:
+- Major coins: BTC, ETH, SOL (full technical analysis via CoinPaprika)
+- Popular memes: DOGE, SHIB, PEPE, WOJAK (price data from any source)
+- New launches: That token that launched 5 minutes ago on Uniswap
+- Any ERC-20, BEP-20, SPL token, or token on any supported chain
+
+Just use the ticker symbol - the MCP automatically finds it!
 
 ### Why am I getting 402 Payment Required errors?
 
@@ -216,10 +242,11 @@ Plus, we love Swift! 🍍
 
 ### Prerequisites
 
-1. **Get a FREE CoinPaprika API Key** (required for technical analysis):
+1. **Get a FREE CoinPaprika API Key** (optional but recommended for technical analysis):
    - Visit [CoinPaprika API](https://coinpaprika.com/api/)
    - Click "Start Free" and register
    - Copy your API key for step 3
+   - 🆕 Note: Basic price data now works without API key via DexPaprika!
 
 ### Quick Install
 
@@ -378,21 +405,45 @@ Here are some natural language prompts you can use:
 "Are there any chart patterns forming on [SYMBOL]?"
 ```
 
+**7. 🆕 Meme Coin & DEX Token Analysis**
+```
+"What's the price of WOJAK?"
+"Analyze that new PEPE fork on Ethereum"
+"Show me price data for [obscure token]"
+"Track this Uniswap token: [contract address]"
+```
+
 💡 **Replace [SYMBOL] with any cryptocurrency ticker** (BTC, ETH, SOL, etc.)
 
 👉 **See 100+ more examples in our [Crypto Analysis Prompts Guide](./PROMPTS.md)**
 
 ## Supported Cryptocurrencies
 
-The MCP now supports **ALL cryptocurrencies** available on CoinPaprika through dynamic symbol resolution. Just use the ticker symbol (e.g., BTC, ETH, DOGE, SHIB, PEPE, etc.).
+**🆕 v1.1 Update**: The MCP now supports **7+ MILLION tokens** through our dual-provider system:
 
-Common symbols are cached for performance, while any other symbol is dynamically resolved via the API.
+1. **CoinPaprika** (Primary): 2,500+ major cryptocurrencies with full technical analysis
+2. **DexPaprika** (Fallback): 7+ million DEX tokens across 23+ blockchains - NO API KEY REQUIRED!
+
+The MCP automatically:
+- Checks CoinPaprika first for established tokens (better data, more features)
+- Falls back to DexPaprika for any token not found
+- Caches results for optimal performance
+- Works with just the ticker symbol
+
+**Supported Networks via DexPaprika**:
+- Ethereum, BSC, Polygon, Arbitrum, Optimism, Base
+- Solana, Avalanche, Fantom, Aptos, Sui
+- And 12+ more chains!
+
+Just use any ticker symbol - if it exists on any DEX, we'll find it!
 
 ## Configuration
 
-### API Key (Required for Technical Analysis)
+### API Key (Optional but Recommended)
 
-⚠️ **Important**: While real-time prices work without an API key, all technical analysis features require at least a FREE CoinPaprika API key.
+⚠️ **Important**: 
+- 🆕 Basic price data now works WITHOUT API key via DexPaprika!
+- Technical analysis features still require a FREE CoinPaprika API key
 
 #### Get your FREE API key:
 
@@ -436,17 +487,17 @@ export COINPAPRIKA_API_KEY="your-api-key-here"
 
 ### Free vs Paid Tiers
 
-| Feature | No API Key | Pro API Key ($99/mo) |
-|---------|------------|---------------------|
-| Real-time prices | ✅ (1-5 min delay) | ✅ (30 sec updates) |
-| Daily analysis | ✅ Full support | ✅ Full support |
-| Intraday analysis | ❌ Not available | ✅ All timeframes |
-| Technical indicators | ✅ Daily only | ✅ All timeframes |
-| Chart patterns | ✅ Daily only | ✅ All timeframes |
-| Trading signals | ✅ Daily only | ✅ All timeframes |
-| Historical data | ✅ 1 year daily | ✅ Full history |
-| Available timeframes | Daily only | 5m, 15m, 30m, 1h, 4h, daily, weekly |
-| Best for | Swing traders & investors | All trading styles |
+| Feature | No API Key | Free API Key | Pro API Key ($99/mo) |
+|---------|------------|--------------|---------------------|
+| Real-time prices | ✅ All tokens via DexPaprika | ✅ 2,500+ tokens | ✅ (30 sec updates) |
+| Token coverage | ✅ 7+ million DEX tokens | ✅ 2,500+ major tokens | ✅ 2,500+ major tokens |
+| Daily analysis | ❌ Prices only | ✅ Full support | ✅ Full support |
+| Intraday analysis | ❌ Not available | ❌ Not available | ✅ All timeframes |
+| Technical indicators | ❌ Not available | ✅ Daily only | ✅ All timeframes |
+| Chart patterns | ❌ Not available | ✅ Daily only | ✅ All timeframes |
+| Trading signals | ❌ Not available | ✅ Daily only | ✅ All timeframes |
+| Historical data | ❌ Not available | ✅ 1 year daily | ✅ Full history |
+| Best for | Price tracking | Swing traders | All trading styles |
 
 ## Timeframes
 
@@ -495,16 +546,18 @@ swift test
 CryptoAnalysisMCP/
 ├── Sources/
 │   └── CryptoAnalysisMCP/
-│       ├── Main.swift              # Entry point
-│       ├── MCPServer.swift         # MCP protocol implementation
-│       ├── CryptoDataProvider.swift # API integration & caching
-│       ├── TechnicalAnalysis.swift # Indicators & calculations
-│       ├── ChartPatterns.swift     # Pattern detection
-│       ├── TradingSignals.swift    # Signal generation
-│       └── Models/                 # Data models
-├── Tests/                          # Unit tests
-├── Package.swift                   # Swift package manifest
-└── README.md                       # This file
+│       ├── Main.swift                    # Entry point
+│       ├── SimpleMCP.swift               # MCP protocol implementation
+│       ├── CryptoDataProvider.swift      # CoinPaprika API integration
+│       ├── DexPaprikaDataProvider.swift  # 🆕 DexPaprika integration
+│       ├── TechnicalAnalyzer.swift       # Indicators & calculations
+│       ├── ChartPatternRecognizer.swift  # Pattern detection
+│       ├── SupportResistanceAnalyzer.swift # Support/resistance levels
+│       ├── AnalysisFormatters.swift      # Output formatting
+│       └── Models.swift                  # Data models
+├── Tests/                                # Unit tests
+├── Package.swift                         # Swift package manifest
+└── README.md                             # This file
 ```
 
 ## Contributing
@@ -525,7 +578,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 - Built with Swift and the Model Context Protocol
 - Powered by CoinPaprika API for cryptocurrency data
+- 🆕 Enhanced with DexPaprika for 7+ million DEX tokens
 - Technical analysis algorithms based on industry standards
+- Special thanks to the CoinPaprika team for their support!
 
 ## Troubleshooting
 

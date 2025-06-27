@@ -5,6 +5,9 @@ import Logging
 actor CryptoDataProvider {
     private let logger = Logger(label: "CryptoDataProvider")
     
+    // DexPaprika provider for 7+ million tokens!
+    private let dexPaprikaProvider = DexPaprikaDataProvider()
+    
     // CoinPaprika API configuration
     private let coinPaprikaBaseURL = "https://api.coinpaprika.com/v1"
     
@@ -79,7 +82,21 @@ actor CryptoDataProvider {
             coinId = firstResult.id
             logger.info("Using first search result: \(firstResult.name) (\(coinId))")
         } else {
-            throw CryptoAnalysisError.invalidSymbol("\(upperSymbol) - No results found")
+            // If CoinPaprika search fails, try DexPaprika
+            logger.info("No results on CoinPaprika for \(upperSymbol), trying DexPaprika...")
+            
+            do {
+                let dexResults = try await dexPaprikaProvider.searchToken(query: upperSymbol, limit: 5)
+                if let firstDexResult = dexResults.first {
+                    logger.info("Found on DexPaprika: \(firstDexResult.name) (\(firstDexResult.symbol))")
+                    // Return a special marker that indicates we should use DexPaprika
+                    throw CryptoAnalysisError.networkError("USE_DEXPAPRIKA")
+                }
+            } catch {
+                // Ignore DexPaprika errors here
+            }
+            
+            throw CryptoAnalysisError.invalidSymbol("\(upperSymbol) - Not found on CoinPaprika or any DEX")
         }
         
         // Cache the result
@@ -99,8 +116,10 @@ actor CryptoDataProvider {
             return cached.data
         }
         
-        // Get CoinPaprika ID dynamically
-        let coinId = try await resolveCoinId(for: upperSymbol)
+        // Try CoinPaprika first
+        do {
+            // Get CoinPaprika ID dynamically
+            let coinId = try await resolveCoinId(for: upperSymbol)
         
         // Fetch from CoinPaprika ticker endpoint
         let urlString = "\(coinPaprikaBaseURL)/tickers/\(coinId)"
@@ -160,6 +179,24 @@ actor CryptoDataProvider {
         } catch {
             logger.error("Failed to fetch price data: \(error)")
             throw CryptoAnalysisError.networkError(error.localizedDescription)
+        }
+        } catch {
+            // If CoinPaprika fails, try DexPaprika
+            logger.info("CoinPaprika failed for \(upperSymbol), trying DexPaprika...")
+            
+            do {
+                let dexToken = try await dexPaprikaProvider.getTokenBySymbol(upperSymbol)
+                let priceData = await dexPaprikaProvider.convertToPriceData(token: dexToken)
+                
+                // Cache the result
+                priceCache[upperSymbol] = (priceData, Date())
+                
+                logger.info("Successfully retrieved \(upperSymbol) from DexPaprika!")
+                return priceData
+            } catch {
+                logger.error("Both CoinPaprika and DexPaprika failed for \(upperSymbol)")
+                throw CryptoAnalysisError.invalidSymbol("\(upperSymbol) - Not found on CoinPaprika or any DEX")
+            }
         }
     }
     

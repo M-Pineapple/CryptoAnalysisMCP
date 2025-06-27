@@ -2,6 +2,8 @@
 
 A Model Context Protocol (MCP) server for comprehensive cryptocurrency technical analysis. Built with Swift, it provides real-time price data, technical indicators, chart pattern detection, and trading signals for over 2,500 cryptocurrencies.
 
+⚠️ **IMPORTANT FOR DAY TRADERS**: This tool requires a $99/mo Pro subscription for intraday analysis. The free tier only supports daily candles, making it suitable for swing traders and long-term investors only.
+
 ## Features
 
 > 💡 **Not sure what to ask?** Check our [**Crypto Analysis Prompts Guide**](./PROMPTS.md) for inspiration!
@@ -42,19 +44,25 @@ Want to suggest a feature? [Open an issue](https://github.com/M-Pineapple/Crypto
 
 ### Do I need a paid API key to use this MCP?
 
-**Short answer**: You need a FREE API key for most features. Paid key for advanced timeframes.
+**Short answer**: Depends on your trading style.
+
+⚠️ **IMPORTANT**: Day traders and scalpers NEED a Pro subscription ($99/mo). The free tier only provides daily candles, which is useless for intraday trading.
 
 **What works WITHOUT any API key:**
-- ✅ Real-time price data (get_crypto_price)
-- ✅ Market cap, volume, 24h changes
-- ✅ Price percentage changes (15m, 30m, 1h, 6h, 12h, 24h, 7d, 30d, 1y)
+- ✅ Real-time price data (with slight delays)
+- ✅ Swing trading analysis (3-7 day trades)
+- ✅ Position trading (weeks to months)
+- ✅ Long-term investment analysis
+- ✅ All technical indicators on DAILY timeframe
+- ✅ 1 year of daily historical data
 
-**What requires a FREE CoinPaprika API key:**
-- 🔑 Technical indicators (RSI, MACD, Bollinger Bands)
-- 🔑 Chart pattern detection
-- 🔑 Support & resistance levels
-- 🔑 Trading signals
-- 🔑 Multi-timeframe analysis
+**What REQUIRES a Pro API key ($99/mo):**
+- ❌ Day trading (you need hourly/4h data)
+- ❌ Scalping (you need minute data)
+- ❌ Intraday patterns and signals
+- ❌ Real-time/low-latency updates
+- ❌ Historical data beyond 1 year
+- ❌ Any timeframe shorter than daily
 
 **How to get your FREE API key:**
 1. Go to [CoinPaprika API](https://coinpaprika.com/api/)
@@ -118,12 +126,18 @@ Just use the ticker symbol - the MCP handles the rest!
 
 ### Why am I getting 402 Payment Required errors?
 
-This means you're trying to access paid features with a free API key:
-- Using 4h or hourly timeframes (free tier only supports daily)
-- Requesting data older than 1 year
-- Exceeding rate limits
+You're trying to use features that require a Pro subscription:
 
-**Solution**: Either use daily timeframe or [upgrade to CoinPaprika Pro](https://coinpaprika.com/api/).
+**Common causes:**
+- Using any timeframe other than 'daily' (4h, 1h, 15m, etc.)
+- Requesting data older than 1 year
+- Exceeding rate limits (rare)
+
+**Solutions:**
+1. **For swing trading/investing**: Just use 'daily' timeframe - it's free!
+2. **For day trading**: You MUST [upgrade to CoinPaprika Pro](https://coinpaprika.com/api/) ($99/mo)
+
+**There is NO free option for day trading**. If you need intraday data, you need to pay.
 
 ### How accurate are the trading signals?
 
@@ -407,24 +421,47 @@ Common symbols are cached for performance, while any other symbol is dynamically
 export COINPAPRIKA_API_KEY="your-api-key-here"
 ```
 
+## Trading Style Compatibility
+
+| Trading Style | Free Tier | Pro Tier ($99/mo) | Why? |
+|--------------|-----------|-------------------|------|
+| 🏃 **Scalping** (minutes) | ❌ Not Possible | ✅ Full Support | Need minute candles |
+| 📊 **Day Trading** (hours) | ❌ Not Possible | ✅ Full Support | Need hourly/4h data |
+| 📈 **Swing Trading** (days) | ✅ Works Great | ✅ Enhanced | Daily candles sufficient |
+| 💼 **Position Trading** | ✅ Works Great | ✅ Enhanced | Daily/weekly analysis |
+| 🏦 **Long-term Investing** | ✅ Works Great | ✅ Enhanced | Daily data is enough |
+
+**Bottom Line**: If you're a day trader, you MUST get the Pro subscription. There's no workaround.
+
 ### Free vs Paid Tiers
 
-| Feature | No API Key | Free API Key | Pro API Key ($99/mo) |
-|---------|------------|--------------|---------------------|
-| Real-time prices | ✅ | ✅ | ✅ |
-| Technical indicators | ❌ | ✅ Daily only | ✅ All timeframes |
-| Chart patterns | ❌ | ✅ Daily only | ✅ All timeframes |
-| Trading signals | ❌ | ✅ Daily only | ✅ All timeframes |
-| Historical data | ❌ | ✅ 1 year | ✅ Full history |
-| Timeframes | - | Daily only | 5m, 15m, 30m, 1h, 4h, daily, weekly |
-| API calls/month | - | 25,000 | 500,000+ |
+| Feature | No API Key | Pro API Key ($99/mo) |
+|---------|------------|---------------------|
+| Real-time prices | ✅ (1-5 min delay) | ✅ (30 sec updates) |
+| Daily analysis | ✅ Full support | ✅ Full support |
+| Intraday analysis | ❌ Not available | ✅ All timeframes |
+| Technical indicators | ✅ Daily only | ✅ All timeframes |
+| Chart patterns | ✅ Daily only | ✅ All timeframes |
+| Trading signals | ✅ Daily only | ✅ All timeframes |
+| Historical data | ✅ 1 year daily | ✅ Full history |
+| Available timeframes | Daily only | 5m, 15m, 30m, 1h, 4h, daily, weekly |
+| Best for | Swing traders & investors | All trading styles |
 
 ## Timeframes
 
+**Free Tier (No API Key):**
+- `daily` - Daily candles only ✅
+
+**Pro Tier ($99/mo) - All timeframes:**
+- `5m` - 5-minute candles
+- `15m` - 15-minute candles
+- `30m` - 30-minute candles
+- `1h` - 1-hour candles
 - `4h` - 4-hour candles
-- `daily` - Daily candles (default)
+- `daily` - Daily candles
 - `weekly` - Weekly candles
-- `monthly` - Monthly candles
+
+💡 **Note**: Attempting to use any timeframe other than 'daily' without a Pro key will result in an error.
 
 ## Risk Levels
 

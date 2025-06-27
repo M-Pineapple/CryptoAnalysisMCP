@@ -1,3 +1,4 @@
+![image](https://github.com/user-attachments/assets/5322afe3-6c1c-4708-a68f-0ba0350a7125)
 # CryptoAnalysisMCP
 
 A Model Context Protocol (MCP) server for comprehensive cryptocurrency technical analysis. Built with Swift, it provides real-time price data, technical indicators, chart pattern detection, and trading signals for over 2,500 cryptocurrencies.

@@ -4,10 +4,10 @@ import Logging
 /// Provides cryptocurrency data from DexPaprika API - 7+ million tokens!
 /// NO API KEY REQUIRED - Completely free access
 actor DexPaprikaDataProvider {
-    private let logger = Logger(label: "DexPaprikaDataProvider")
+    internal let logger = Logger(label: "DexPaprikaDataProvider")
     
     // DexPaprika API configuration
-    private let dexPaprikaBaseURL = "https://api.dexpaprika.com"
+    internal let dexPaprikaBaseURL = "https://api.dexpaprika.com"
     
     // Cache for performance
     private var tokenCache: [String: (data: DexPaprikaToken, timestamp: Date)] = [:]
@@ -15,25 +15,28 @@ actor DexPaprikaDataProvider {
     private let cacheTimeout: TimeInterval = 60 // 1 minute for price data
     
     // Network name to ID mapping for common networks
-    private let networkMapping: [String: String] = [
+    internal let networkMapping: [String: String] = [
         "ethereum": "ethereum",
         "eth": "ethereum",
-        "binance": "binance-smart-chain",
-        "bsc": "binance-smart-chain",
+        "binance": "bsc",
+        "binance-smart-chain": "bsc",
+        "bsc": "bsc",
         "polygon": "polygon",
         "matic": "polygon",
         "arbitrum": "arbitrum",
         "arb": "arbitrum",
         "optimism": "optimism",
         "op": "optimism",
-        "avalanche": "avalanche-c-chain",
-        "avax": "avalanche-c-chain",
+        "avalanche": "avalanche",
+        "avalanche-c-chain": "avalanche",
+        "avax": "avalanche",
         "fantom": "fantom",
         "ftm": "fantom",
         "solana": "solana",
         "sol": "solana",
         "base": "base",
-        "zksync": "zksync-era",
+        "zksync": "zksync",
+        "zksync-era": "zksync",
         "linea": "linea",
         "mantle": "mantle",
         "blast": "blast"
@@ -59,6 +62,11 @@ actor DexPaprikaDataProvider {
             guard let httpResponse = response as? HTTPURLResponse,
                   (200...299).contains(httpResponse.statusCode) else {
                 throw CryptoAnalysisError.networkError("Invalid response")
+            }
+            
+            // Debug: Log raw response
+            if let jsonString = String(data: data, encoding: .utf8) {
+                logger.info("Raw networks response: \(jsonString.prefix(200))...")
             }
             
             let networks = try JSONDecoder().decode([DexPaprikaNetwork].self, from: data)
@@ -162,7 +170,7 @@ actor DexPaprikaDataProvider {
             change24h: summary.priceUsd * (summary.priceChange24h / 100),
             changePercent24h: summary.priceChange24h,
             volume24h: summary.volumeUsd24h,
-            marketCap: summary.liquidityUsd ?? 0,
+            marketCap: summary.liquidityUsd,
             timestamp: Date(),
             rank: 0, // DexPaprika doesn't provide rank
             // Additional time-based changes not available from DexPaprika
@@ -210,16 +218,16 @@ actor DexPaprikaDataProvider {
 
 struct DexPaprikaNetwork: Codable {
     let id: String
-    let name: String
-    let shortName: String
-    let chainId: Int?
+    let displayName: String
     
     private enum CodingKeys: String, CodingKey {
         case id
-        case name
-        case shortName = "short_name"
-        case chainId = "chain_id"
+        case displayName = "display_name"
     }
+    
+    // Computed properties for compatibility
+    var name: String { displayName }
+    var shortName: String { id }
 }
 
 struct DexPaprikaSearchResponse: Codable {
@@ -227,71 +235,96 @@ struct DexPaprikaSearchResponse: Codable {
 }
 
 struct DexPaprikaSearchResult: Codable {
+    let id: String  // This is the address
     let name: String
     let symbol: String
-    let address: String
-    let networkId: String
-    let networkName: String
-    let logoUrl: String?
+    let chain: String  // This is the network ID
+    let priceUsd: Double?
+    let liquidityUsd: Double?
+    let volumeUsd: Double?
     
     private enum CodingKeys: String, CodingKey {
-        case name
-        case symbol
-        case address
-        case networkId = "network_id"
-        case networkName = "network_name"
-        case logoUrl = "logo_url"
+        case id, name, symbol, chain
+        case priceUsd = "price_usd"
+        case liquidityUsd = "liquidity_usd"
+        case volumeUsd = "volume_usd"
     }
+    
+    // Computed properties for compatibility with existing code
+    var address: String { id }
+    var networkId: String { chain }
+    var networkName: String { chain }
+    var logoUrl: String? { nil }
 }
 
 struct DexPaprikaToken: Codable {
+    let id: String
     let name: String
     let symbol: String
-    let address: String
+    let chain: String
     let decimals: Int
-    let logoUrl: String?
+    let totalSupply: Double?
     let summary: DexPaprikaSummary
-    let network: DexPaprikaNetworkInfo
     
     private enum CodingKeys: String, CodingKey {
-        case name
-        case symbol
-        case address
-        case decimals
-        case logoUrl = "logo_url"
-        case summary
-        case network
+        case id, name, symbol, chain, decimals, summary
+        case totalSupply = "total_supply"
+    }
+    
+    // Computed properties for compatibility
+    var address: String { id }
+    var logoUrl: String? { nil }
+    var network: DexPaprikaNetworkInfo {
+        DexPaprikaNetworkInfo(id: chain, name: chain, shortName: nil)
     }
 }
 
 struct DexPaprikaSummary: Codable {
     let priceUsd: Double
-    let priceChange24h: Double
-    let volumeUsd24h: Double
-    let liquidityUsd: Double?
-    let totalSupply: Double?
-    let circulatingSupply: Double?
-    let holders: Int?
+    let liquidityUsd: Double
+    let pools: Int?
+    let twentyFourHour: DexPaprikaTimeData?
     
     private enum CodingKeys: String, CodingKey {
+        case pools
         case priceUsd = "price_usd"
-        case priceChange24h = "price_change_24h"
-        case volumeUsd24h = "volume_usd_24h"
         case liquidityUsd = "liquidity_usd"
-        case totalSupply = "total_supply"
-        case circulatingSupply = "circulating_supply"
-        case holders
+        case twentyFourHour = "24h"
+    }
+    
+    // Computed properties for compatibility
+    var priceChange24h: Double {
+        twentyFourHour?.lastPriceUsdChange ?? 0
+    }
+    var volumeUsd24h: Double {
+        twentyFourHour?.volumeUsd ?? 0
+    }
+    var totalSupply: Double? { nil }
+    var circulatingSupply: Double? { nil }
+    var holders: Int? { nil }
+}
+
+struct DexPaprikaTimeData: Codable {
+    let volumeUsd: Double
+    let lastPriceUsdChange: Double
+    
+    private enum CodingKeys: String, CodingKey {
+        case volumeUsd = "volume_usd"
+        case lastPriceUsdChange = "last_price_usd_change"
     }
 }
 
 struct DexPaprikaNetworkInfo: Codable {
     let id: String
     let name: String
-    let shortName: String
+    let shortName: String?
     
     private enum CodingKeys: String, CodingKey {
         case id
         case name
         case shortName = "short_name"
     }
+    
+    // Computed property for compatibility
+    var displayName: String { name }
 }

@@ -20,11 +20,21 @@ A Model Context Protocol (MCP) server for comprehensive cryptocurrency technical
   - 🚀 Early token hunters
   - 📊 Anyone tracking obscure tokens
 
+### 🔧 New Liquidity & DEX Tools
+- **get_token_liquidity**: Track liquidity across all DEXes for any token
+- **search_tokens_by_network**: Find tokens on specific blockchains
+- **compare_dex_prices**: Compare token prices across different DEXes
+- **get_network_pools**: View top liquidity pools on any network
+- **get_dex_info**: Get information about DEXes on a network
+- **get_available_networks**: List all 23+ supported blockchains
+- **search_tokens_advanced**: Advanced search with liquidity/volume filters
+
 ## Features
 
 > 💡 **Not sure what to ask?** Check our [**Crypto Analysis Prompts Guide**](./PROMPTS.md) for inspiration!
 
 - **🆕 Universal Token Support**: 7+ MILLION tokens through DexPaprika integration
+- **🆕 Liquidity Pool Analytics**: Monitor liquidity, volume, and pool data across DEXes
 - **Dynamic Symbol Resolution**: Automatically supports all cryptocurrencies
 - **Real-time Price Data**: Current prices, volume, market cap, and percentage changes
 - **Technical Indicators**: RSI, MACD, Moving Averages, Bollinger Bands, and more
@@ -73,6 +83,8 @@ Want to suggest a feature? [Open an issue](https://github.com/M-Pineapple/Crypto
 - ✅ All technical indicators on DAILY timeframe
 - ✅ 1 year of daily historical data
 - 🆕 Basic price data for 7+ MILLION tokens via DexPaprika
+- 🆕 Liquidity pool data across all major DEXes
+- 🆕 DEX price comparison and aggregation
 
 **What REQUIRES a Pro API key ($99/mo):**
 - ❌ Day trading (you need hourly/4h data)
@@ -359,6 +371,43 @@ crypto-analysis:multi_timeframe_analysis
   symbol: "AVAX"
 ```
 
+### 🆕 NEW v1.1 Commands
+
+### Get Token Liquidity
+```
+crypto-analysis:get_token_liquidity
+  symbol: "PEPE"
+  network: "ethereum" (optional)
+```
+
+### Search Tokens by Network
+```
+crypto-analysis:search_tokens_by_network
+  network: "solana"
+  query: "meme" (optional)
+  limit: 20
+```
+
+### Compare DEX Prices
+```
+crypto-analysis:compare_dex_prices
+  symbol: "SHIB"
+  network: "ethereum"
+```
+
+### Get Network Pools
+```
+crypto-analysis:get_network_pools
+  network: "ethereum"
+  sort_by: "volume_usd"
+  limit: 10
+```
+
+### Get Available Networks
+```
+crypto-analysis:get_available_networks
+```
+
 ## 💡 Quick Examples
 
 Here are some natural language prompts you can use:
@@ -411,6 +460,16 @@ Here are some natural language prompts you can use:
 "Analyze that new PEPE fork on Ethereum"
 "Show me price data for [obscure token]"
 "Track this Uniswap token: [contract address]"
+```
+
+**8. 🆕 Liquidity & DEX Analytics**
+```
+"What's the liquidity for SHIB across all DEXes?"
+"Show me the top pools on Solana"
+"Compare PEPE prices on different DEXes"
+"Find high liquidity meme coins on BSC"
+"Which DEX has the best price for ETH?"
+"Show me all tokens on Arbitrum with >$1M liquidity"
 ```
 
 💡 **Replace [SYMBOL] with any cryptocurrency ticker** (BTC, ETH, SOL, etc.)
@@ -491,13 +550,15 @@ export COINPAPRIKA_API_KEY="your-api-key-here"
 |---------|------------|--------------|---------------------|
 | Real-time prices | ✅ All tokens via DexPaprika | ✅ 2,500+ tokens | ✅ (30 sec updates) |
 | Token coverage | ✅ 7+ million DEX tokens | ✅ 2,500+ major tokens | ✅ 2,500+ major tokens |
+| Liquidity data | ✅ Basic liquidity info | ✅ Limited to major tokens | ✅ Enhanced data |
+| DEX analytics | ✅ Pool data, DEX comparison | ❌ Not available | ❌ Not available |
 | Daily analysis | ❌ Prices only | ✅ Full support | ✅ Full support |
 | Intraday analysis | ❌ Not available | ❌ Not available | ✅ All timeframes |
 | Technical indicators | ❌ Not available | ✅ Daily only | ✅ All timeframes |
 | Chart patterns | ❌ Not available | ✅ Daily only | ✅ All timeframes |
 | Trading signals | ❌ Not available | ✅ Daily only | ✅ All timeframes |
 | Historical data | ❌ Not available | ✅ 1 year daily | ✅ Full history |
-| Best for | Price tracking | Swing traders | All trading styles |
+| Best for | Price tracking & DEX analysis | Swing traders | All trading styles |
 
 ## Timeframes
 

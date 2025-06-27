@@ -51,21 +51,9 @@ A Model Context Protocol (MCP) server for comprehensive cryptocurrency technical
 We're actively working on exciting new features to make CryptoAnalysisMCP even more powerful:
 
 ### 🆕 Next Release (v1.2.0)
-- **🌊 Elliott Wave Analysis**: Automated wave counting and prediction
-- **🕯️ Advanced Candlestick Patterns**: Three Black Crows, Three White Soldiers, Marubozu, and more
-- **📊 Portfolio Correlation Analysis**: Track how your holdings correlate with each other
-- **🔔 Custom Alert Conditions**: Set personalized alerts based on technical indicators
-- **📝 Trading Journal Integration**: Log and analyze your trades automatically
-- **🔄 CoinMarketCap API Support**: Switch between CoinPaprika and CoinMarketCap APIs seamlessly
+![image](https://github.com/user-attachments/assets/7f018851-c15a-464f-9391-be6fa24de61b)
 
-### 🔮 Future Enhancements
-- **🦎 CoinGecko API Integration**: Add support for CoinGecko as a third data source
-- **🤖 AI-Powered Predictions**: Machine learning models for price movement predictions
-- **🌐 Social Sentiment Analysis**: Integrate Twitter/Reddit sentiment data
-- **⛓️ On-chain Analytics**: DeFi metrics, whale movements, exchange flows
-- **📡 WebSocket Support**: Real-time price and indicator updates
-- **💱 Multi-exchange Support**: Aggregate data from multiple exchanges
-- **📊 Custom Indicator Builder**: Create your own technical indicators
+
 
 Want to suggest a feature? [Open an issue](https://github.com/M-Pineapple/CryptoAnalysisMCP/issues) on GitHub!
 
@@ -536,31 +524,15 @@ export COINPAPRIKA_API_KEY="your-api-key-here"
 
 ## Trading Style Compatibility
 
-| Trading Style | Free Tier | Pro Tier ($99/mo) | Why? |
-|--------------|-----------|-------------------|------|
-| 🏃 **Scalping** (minutes) | ❌ Not Possible | ✅ Full Support | Need minute candles |
-| 📊 **Day Trading** (hours) | ❌ Not Possible | ✅ Full Support | Need hourly/4h data |
-| 📈 **Swing Trading** (days) | ✅ Works Great | ✅ Enhanced | Daily candles sufficient |
-| 💼 **Position Trading** | ✅ Works Great | ✅ Enhanced | Daily/weekly analysis |
-| 🏦 **Long-term Investing** | ✅ Works Great | ✅ Enhanced | Daily data is enough |
+![image](https://github.com/user-attachments/assets/10a83419-dec3-43b8-95cc-31be3f01ee41)
+
 
 **Bottom Line**: If you're a day trader, you MUST get the Pro subscription. There's no workaround.
 
 ### Free vs Paid Tiers
 
-| Feature | No API Key | Free API Key | Pro API Key ($99/mo) |
-|---------|------------|--------------|---------------------|
-| Real-time prices | ✅ All tokens via DexPaprika | ✅ 2,500+ tokens | ✅ (30 sec updates) |
-| Token coverage | ✅ 7+ million DEX tokens | ✅ 2,500+ major tokens | ✅ 2,500+ major tokens |
-| Liquidity data | ✅ Basic liquidity info | ✅ Limited to major tokens | ✅ Enhanced data |
-| DEX analytics | ✅ Pool data, DEX comparison | ❌ Not available | ❌ Not available |
-| Daily analysis | ❌ Prices only | ✅ Full support | ✅ Full support |
-| Intraday analysis | ❌ Not available | ❌ Not available | ✅ All timeframes |
-| Technical indicators | ❌ Not available | ✅ Daily only | ✅ All timeframes |
-| Chart patterns | ❌ Not available | ✅ Daily only | ✅ All timeframes |
-| Trading signals | ❌ Not available | ✅ Daily only | ✅ All timeframes |
-| Historical data | ❌ Not available | ✅ 1 year daily | ✅ Full history |
-| Best for | Price tracking & DEX analysis | Swing traders | All trading styles |
+![image](https://github.com/user-attachments/assets/841f123f-5ec6-4c93-a336-8b6b183852b2)
+
 
 ## Timeframes
 

@@ -225,7 +225,7 @@ extension CryptoAnalysisHandler {
         
         do {
             // Try to get token data with liquidity info
-            let dexProvider = dataProvider.dexPaprikaProvider
+            let dexProvider = await dexPaprikaProvider
             
             if let network = network {
                 // Search on specific network
@@ -292,7 +292,7 @@ extension CryptoAnalysisHandler {
         let limit = arguments["limit"] as? Int ?? 20
         
         do {
-            let dexProvider = dataProvider.dexPaprikaProvider
+            let dexProvider = await dexPaprikaProvider
             
             // Get pools on the network - try to get more pools to find tokens
             let pools = try await dexProvider.getNetworkPools(network: network, limit: 100, orderBy: "volume_usd")
@@ -377,7 +377,7 @@ extension CryptoAnalysisHandler {
         }
         
         do {
-            let dexProvider = dataProvider.dexPaprikaProvider
+            let dexProvider = await dexPaprikaProvider
             
             // Search for the token
             let searchResults = try await dexProvider.searchToken(query: symbol, limit: 20)

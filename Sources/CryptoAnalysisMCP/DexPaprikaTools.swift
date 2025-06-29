@@ -448,7 +448,7 @@ extension CryptoAnalysisHandler {
         let limit = arguments["limit"] as? Int ?? 20
         
         do {
-            let dexProvider = dataProvider.dexPaprikaProvider
+            let dexProvider = await dexPaprikaProvider
             let pools = try await dexProvider.getNetworkPools(network: network, limit: limit, orderBy: sortBy)
             
             return [
@@ -491,7 +491,7 @@ extension CryptoAnalysisHandler {
         }
         
         do {
-            let dexProvider = dataProvider.dexPaprikaProvider
+            let dexProvider = await dexPaprikaProvider
             let dexes = try await dexProvider.getNetworkDexes(network: network)
             
             // Since the DEX endpoint doesn't provide volume/liquidity data,
@@ -523,7 +523,7 @@ extension CryptoAnalysisHandler {
         }
         
         do {
-            let dexProvider = dataProvider.dexPaprikaProvider
+            let dexProvider = await dexPaprikaProvider
             let poolDetail = try await dexProvider.getPoolDetails(network: network, poolAddress: poolAddress)
             
             return [
@@ -587,7 +587,7 @@ extension CryptoAnalysisHandler {
         let interval = arguments["interval"] as? String ?? "1d"
         
         do {
-            let dexProvider = dataProvider.dexPaprikaProvider
+            let dexProvider = await dexPaprikaProvider
             let ohlcvData = try await dexProvider.getPoolOHLCV(
                 network: network,
                 poolAddress: poolAddress,
@@ -640,7 +640,7 @@ extension CryptoAnalysisHandler {
     
     func getAvailableNetworks(arguments: [String: Any]) async -> [String: Any] {
         do {
-            let dexProvider = dataProvider.dexPaprikaProvider
+            let dexProvider = await dexPaprikaProvider
             let networks = try await dexProvider.getNetworks()
             
             return [
@@ -675,7 +675,7 @@ extension CryptoAnalysisHandler {
         let limit = arguments["limit"] as? Int ?? 20
         
         do {
-            let dexProvider = dataProvider.dexPaprikaProvider
+            let dexProvider = await dexPaprikaProvider
             let searchResults = try await dexProvider.searchToken(query: query, limit: 100)
             
             // Get detailed token data for filtering

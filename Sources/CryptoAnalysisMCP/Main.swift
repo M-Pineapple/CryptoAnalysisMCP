@@ -223,7 +223,7 @@ actor CryptoAnalysisHandler {
     private let technicalAnalyzer = TechnicalAnalyzer()
     private let patternRecognizer = ChartPatternRecognizer()
     private let supportResistanceAnalyzer = SupportResistanceAnalyzer()
-    private let logger = Logger(label: "CryptoAnalysisHandler")
+    let logger = Logger(label: "CryptoAnalysisHandler")
     
     // Cache for performance
     private var analysisCache: [String: (data: AnalysisResult, timestamp: Date)] = [:]

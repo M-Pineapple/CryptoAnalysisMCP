@@ -6,7 +6,7 @@ actor CryptoDataProvider {
     private let logger = Logger(label: "CryptoDataProvider")
     
     // DexPaprika provider for 7+ million tokens!
-    private let dexPaprikaProvider = DexPaprikaDataProvider()
+    let dexPaprikaProvider = DexPaprikaDataProvider()
     
     // CoinPaprika API configuration
     private let coinPaprikaBaseURL = "https://api.coinpaprika.com/v1"

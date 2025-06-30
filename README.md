@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="">
+  <img src="https://github.com/user-attachments/assets/5d1aae51-4183-4cd5-a79c-163fc1e8c918">
 </div>
 
 # CryptoAnalysisMCP v1.1 🚀

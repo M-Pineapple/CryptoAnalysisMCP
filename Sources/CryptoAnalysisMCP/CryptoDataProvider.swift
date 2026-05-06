@@ -8,12 +8,25 @@ actor CryptoDataProvider {
     // DexPaprika provider for 7+ million tokens!
     let dexPaprikaProvider = DexPaprikaDataProvider()
     
-    // CoinPaprika API configuration
-    private let coinPaprikaBaseURL = "https://api.coinpaprika.com/v1"
-    
-    // API Key - Set this if you have a paid CoinPaprika subscription
-    // You can also set the COINPAPRIKA_API_KEY environment variable
+    // CoinPaprika API configuration. Free tier uses api.coinpaprika.com;
+    // paid plans (Starter / Pro / Business / Ultimate / Enterprise) live on
+    // a separate hostname, api-pro.coinpaprika.com. Switch automatically
+    // when COINPAPRIKA_API_KEY is set.
     private let apiKey: String? = ProcessInfo.processInfo.environment["COINPAPRIKA_API_KEY"]
+    private let coinPaprikaBaseURL: String = ProcessInfo.processInfo.environment["COINPAPRIKA_API_KEY"] != nil
+        ? "https://api-pro.coinpaprika.com/v1"
+        : "https://api.coinpaprika.com/v1"
+
+    /// Builds a `URLRequest` with the `Authorization` header set to the bare
+    /// API key when one is configured. CoinPaprika expects the bare key —
+    /// a `Bearer ` prefix triggers a Cloudflare 403 on api-pro.
+    private func authedRequest(_ url: URL) -> URLRequest {
+        var request = URLRequest(url: url)
+        if let key = apiKey {
+            request.addValue(key, forHTTPHeaderField: "Authorization")
+        }
+        return request
+    }
     
     // Cache for performance
     private var priceCache: [String: (data: PriceData, timestamp: Date)] = [:]
@@ -130,7 +143,7 @@ actor CryptoDataProvider {
         logger.info("Fetching price data for \(upperSymbol) from CoinPaprika")
         
         do {
-            let (data, response) = try await URLSession.shared.data(from: url)
+            let (data, response) = try await URLSession.shared.data(for: authedRequest(url))
             
             guard let httpResponse = response as? HTTPURLResponse else {
                 throw CryptoAnalysisError.networkError("Invalid response")
@@ -250,13 +263,8 @@ actor CryptoDataProvider {
             interval = "30d"
         }
         
-        var urlString = "\(coinPaprikaBaseURL)/coins/\(coinId)/ohlcv/historical?start=\(startDateString)&end=\(endDateString)&interval=\(interval)"
-        
-        // Add API key if available
-        if let apiKey = apiKey {
-            urlString += "&apikey=\(apiKey)"
-        }
-        
+        let urlString = "\(coinPaprikaBaseURL)/coins/\(coinId)/ohlcv/historical?start=\(startDateString)&end=\(endDateString)&interval=\(interval)"
+
         guard let url = URL(string: urlString) else {
             throw CryptoAnalysisError.networkError("Invalid URL")
         }
@@ -264,7 +272,7 @@ actor CryptoDataProvider {
         logger.info("Fetching historical data for \(upperSymbol) from \(startDateString) to \(endDateString)")
         
         do {
-            let (data, response) = try await URLSession.shared.data(from: url)
+            let (data, response) = try await URLSession.shared.data(for: authedRequest(url))
             
             guard let httpResponse = response as? HTTPURLResponse else {
                 throw CryptoAnalysisError.networkError("Invalid response")
@@ -392,13 +400,17 @@ extension CryptoDataProvider {
     
     /// Search for cryptocurrency by name or symbol
     func searchCrypto(query: String) async throws -> [(symbol: String, name: String, id: String)] {
-        let urlString = "\(coinPaprikaBaseURL)/search?q=\(query)&limit=10"
+        // Trailing slash matters: `/search?q=...` returns a 301 redirect, and
+        // URLSession strips the Authorization header when following redirects,
+        // which then fails with a Cloudflare 403 against api-pro. Hit
+        // `/search/?q=...` directly to avoid the redirect.
+        let urlString = "\(coinPaprikaBaseURL)/search/?q=\(query)&limit=10"
         guard let url = URL(string: urlString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "") else {
             throw CryptoAnalysisError.networkError("Invalid URL")
         }
         
         do {
-            let (data, response) = try await URLSession.shared.data(from: url)
+            let (data, response) = try await URLSession.shared.data(for: authedRequest(url))
             
             guard let httpResponse = response as? HTTPURLResponse,
                   (200...299).contains(httpResponse.statusCode) else {

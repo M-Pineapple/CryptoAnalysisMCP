@@ -287,6 +287,8 @@ cd CryptoAnalysisMCP
 }
 ```
 
+> As of v1.3.0 the server runs on the official [`mcp-swift-sdk`](https://github.com/modelcontextprotocol/swift-sdk) transport by default. To opt back into the legacy `SimpleMCP` transport (one-release safety valve, removed in v1.4), pass `"args": ["--use-legacy"]` in the config above.
+
 4. Restart Claude Desktop
 
 ### Global Installation (Optional)
@@ -531,6 +533,22 @@ Just use any ticker symbol - if it exists on any DEX, we'll find it!
 ```bash
 export COINPAPRIKA_API_KEY="your-api-key-here"
 ```
+
+### Transport
+
+CryptoAnalysisMCP v1.3+ runs on the official `mcp-swift-sdk` (v0.12.1) by default.
+A legacy in-tree `SimpleMCP` transport is retained for one release as an opt-out:
+
+- **Default (recommended):** no flag needed.
+- **Opt out:** add `"args": ["--use-legacy"]` to your Claude Desktop config.
+- **`--use-sdk`:** accepted as a no-op for v1.2.x backward compatibility; emits a one-time deprecation warning to stderr. Will be removed in v1.4.
+
+Both transports expose the same 16 tools with the same input schemas (verified by an integration test on every build). Wire-format differences:
+
+- The SDK serializes JSON with sorted keys.
+- The SDK emits `"description": null` for tools without a description; the legacy path omits the key.
+
+Neither difference is semantically meaningful, but anyone diffing their JSON-RPC traffic across versions should be aware.
 
 ## Trading Style Compatibility
 

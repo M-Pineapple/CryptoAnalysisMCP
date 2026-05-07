@@ -270,4 +270,102 @@ struct GoldenVectorTests {
             )
         }
     }
+
+    @Test func rsiTimestampMatchesInputCandle() async throws {
+        let candles = Self.candles()
+        let analyzer = TechnicalAnalyzer()
+        let period = 14
+        let results = await analyzer.calculateRSI(data: candles, period: period)
+        try #require(!results.isEmpty)
+        try #require(
+            results.count == candles.count - period,
+            "RSI(\(period)) on \(candles.count) bars should emit \(candles.count - period) results, got \(results.count)"
+        )
+
+        // Per TechnicalAnalyzer.swift:78 `gains` is built over `1..<data.count`
+        // (length `data.count - 1`); :85 outer `i` runs `(period - 1)..<gains.count`;
+        // :101 writes `data[i + 1].timestamp`. With result index
+        // `r = i - (period - 1)`, the anchor is `data[r + period].timestamp`.
+        for r in results.indices {
+            let expectedIdx = r + period
+            try #require(expectedIdx < candles.count)
+            #expect(
+                results[r].timestamp == candles[expectedIdx].timestamp,
+                "RSI[\(r)].timestamp expected candles[\(expectedIdx)] = \(candles[expectedIdx].timestamp), got \(results[r].timestamp)"
+            )
+        }
+    }
+
+    @Test func obvTimestampMatchesInputCandle() async throws {
+        let candles = Self.candles()
+        let analyzer = TechnicalAnalyzer()
+        let results = await analyzer.calculateOBV(data: candles)
+        try #require(!results.isEmpty)
+        try #require(
+            results.count == candles.count - 1,
+            "OBV on \(candles.count) bars should emit \(candles.count - 1) results, got \(results.count)"
+        )
+
+        // Per TechnicalAnalyzer.swift:284 outer `i` runs `1..<data.count`;
+        // :298 writes `data[i].timestamp`. With result index `r = i - 1`,
+        // the anchor is `data[r + 1].timestamp`.
+        for r in results.indices {
+            let expectedIdx = r + 1
+            try #require(expectedIdx < candles.count)
+            #expect(
+                results[r].timestamp == candles[expectedIdx].timestamp,
+                "OBV[\(r)].timestamp expected candles[\(expectedIdx)] = \(candles[expectedIdx].timestamp), got \(results[r].timestamp)"
+            )
+        }
+    }
+
+    @Test func williamsRTimestampMatchesInputCandle() async throws {
+        let candles = Self.candles()
+        let analyzer = TechnicalAnalyzer()
+        let period = 14
+        let results = await analyzer.calculateWilliamsR(data: candles, period: period)
+        try #require(!results.isEmpty)
+        try #require(
+            results.count == candles.count - period + 1,
+            "Williams %R(\(period)) on \(candles.count) bars should emit \(candles.count - period + 1) results, got \(results.count)"
+        )
+
+        // Per TechnicalAnalyzer.swift:250 outer `i` runs `(period - 1)..<data.count`;
+        // :263 writes `data[i].timestamp`. With result index
+        // `r = i - (period - 1)`, the anchor is `data[r + period - 1].timestamp`.
+        for r in results.indices {
+            let expectedIdx = r + period - 1
+            try #require(expectedIdx < candles.count)
+            #expect(
+                results[r].timestamp == candles[expectedIdx].timestamp,
+                "WilliamsR[\(r)].timestamp expected candles[\(expectedIdx)] = \(candles[expectedIdx].timestamp), got \(results[r].timestamp)"
+            )
+        }
+    }
+
+    @Test func bollingerTimestampMatchesInputCandle() async throws {
+        let candles = Self.candles()
+        let analyzer = TechnicalAnalyzer()
+        let period = 20
+        let results = await analyzer.calculateBollingerBands(
+            data: candles, period: period, standardDeviations: 2.0
+        )
+        try #require(!results.isEmpty)
+        try #require(
+            results.count == candles.count - period + 1,
+            "Bollinger(\(period)) on \(candles.count) bars should emit \(candles.count - period + 1) results, got \(results.count)"
+        )
+
+        // Per TechnicalAnalyzer.swift:205 outer `i` runs `(period - 1)..<data.count`;
+        // :227 writes `data[i].timestamp`. With result index
+        // `r = i - (period - 1)`, the anchor is `data[r + period - 1].timestamp`.
+        for r in results.indices {
+            let expectedIdx = r + period - 1
+            try #require(expectedIdx < candles.count)
+            #expect(
+                results[r].timestamp == candles[expectedIdx].timestamp,
+                "Bollinger[\(r)].timestamp expected candles[\(expectedIdx)] = \(candles[expectedIdx].timestamp), got \(results[r].timestamp)"
+            )
+        }
+    }
 }

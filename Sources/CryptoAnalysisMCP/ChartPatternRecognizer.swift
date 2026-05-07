@@ -1,6 +1,112 @@
 import Foundation
 import Logging
 
+/// Heuristic confidence weights used by ChartPatternRecognizer pattern detectors.
+///
+/// These values are unweighted heuristics, not empirically calibrated against
+/// a backtest dataset. They reflect the relative rigour of each pattern's
+/// classical definition: well-defined patterns (head and shoulders, triangles)
+/// score higher than loose ones (single-candle reversals like hammer/doji).
+/// All confidences are normalized to [0.0, 1.0] before being returned.
+///
+/// To recalibrate against historical data, replace each constant with a
+/// percentile derived from a labelled pattern dataset and tracked in CHANGELOG.
+private enum PatternConfidence {
+    // MARK: Multi-candle structural patterns
+
+    /// Base score used as the starting point for the head-and-shoulders
+    /// confidence calculation before symmetry/prominence/neckline bonuses.
+    /// Heuristic; not empirically calibrated.
+    static let headAndShouldersBase: Double = 0.5
+
+    /// Base score for the inverse head-and-shoulders calculation. Shares the
+    /// same calculation path as `headAndShouldersBase`. Heuristic.
+    static let inverseHeadAndShouldersBase: Double = 0.5
+
+    /// Base score used as the starting point for the double-top confidence
+    /// calculation before peak-similarity / valley-depth bonuses. Heuristic.
+    static let doubleTopBase: Double = 0.5
+
+    /// Base score used as the starting point for the double-bottom confidence
+    /// calculation before trough-similarity / peak-height bonuses. Heuristic.
+    static let doubleBottomBase: Double = 0.5
+
+    /// Fixed confidence assigned to a triple-top whenever the three peaks
+    /// fall within the price tolerance band. No further bonuses applied.
+    /// Heuristic; not empirically calibrated.
+    static let tripleTopBase: Double = 0.75
+
+    /// Fixed confidence assigned to a triple-bottom under the same rules
+    /// as `tripleTopBase`. Heuristic.
+    static let tripleBottomBase: Double = 0.75
+
+    // MARK: Triangles and wedges
+
+    /// Fixed confidence for a recognised ascending-triangle structure.
+    /// Heuristic; reflects the relatively well-defined shape of the pattern.
+    static let ascendingTriangleBase: Double = 0.7
+
+    /// Fixed confidence for a recognised descending-triangle structure.
+    /// Heuristic.
+    static let descendingTriangleBase: Double = 0.7
+
+    /// Fixed confidence for a symmetrical triangle. Slightly lower than the
+    /// directional triangles because the breakout direction is ambiguous.
+    /// Heuristic.
+    static let symmetricalTriangleBase: Double = 0.65
+
+    /// Fixed confidence for a rising-wedge reversal. Wedges are looser than
+    /// triangles, so they score lower by default. Heuristic.
+    static let risingWedgeBase: Double = 0.6
+
+    /// Fixed confidence for a falling-wedge reversal. Heuristic.
+    static let fallingWedgeBase: Double = 0.6
+
+    // MARK: Rectangles / flags / pennants
+
+    /// Fixed confidence for a rectangle / range-bound consolidation.
+    /// Heuristic; comparable to a symmetrical triangle.
+    static let rectangleBase: Double = 0.65
+
+    // MARK: Single-candle reversals
+
+    /// Fixed confidence for a hammer candlestick. Single-candle patterns
+    /// are inherently weaker than multi-candle structures, so this is low.
+    /// Heuristic.
+    static let hammerBase: Double = 0.6
+
+    /// Fixed confidence for a doji. Doji indicates indecision rather than a
+    /// directional signal, so it gets the lowest base score. Heuristic.
+    static let dojiBase: Double = 0.5
+
+    /// Fixed confidence for a shooting-star candlestick. Mirror of `hammerBase`
+    /// for bearish reversals. Heuristic.
+    static let shootingStarBase: Double = 0.6
+
+    /// Fixed confidence for a bullish or bearish engulfing pattern.
+    /// Two-candle pattern that sits between single-candle and structural
+    /// patterns in reliability. Heuristic.
+    static let engulfingBase: Double = 0.7
+
+    // MARK: Three-candle reversal patterns
+
+    /// Fixed confidence for a morning-star three-candle bullish reversal.
+    /// Higher than two-candle patterns due to its more specific shape
+    /// requirements. Heuristic.
+    static let morningStarBase: Double = 0.8
+
+    /// Fixed confidence for an evening-star three-candle bearish reversal.
+    /// Heuristic.
+    static let eveningStarBase: Double = 0.8
+
+    // MARK: Bounds
+
+    /// Maximum allowed confidence after all bonuses applied.
+    static let maximum: Double = 1.0
+    /// Minimum allowed confidence (a pattern that "almost" matched should still be > 0).
+    static let minimum: Double = 0.0
+}
+
 /// Recognizes chart patterns in price data
 actor ChartPatternRecognizer {
     private let logger = Logger(label: "ChartPatternRecognizer")
@@ -299,7 +405,7 @@ actor ChartPatternRecognizer {
                         
                         let pattern = ChartPattern(
                             type: .tripleTop,
-                            confidence: 0.75,
+                            confidence: PatternConfidence.tripleTopBase,
                             startDate: peak1.timestamp,
                             endDate: peak3.timestamp,
                             keyPoints: [peak1, peak2, peak3] + supportingTroughs,
@@ -341,7 +447,7 @@ actor ChartPatternRecognizer {
                         
                         let pattern = ChartPattern(
                             type: .tripleBottom,
-                            confidence: 0.75,
+                            confidence: PatternConfidence.tripleBottomBase,
                             startDate: trough1.timestamp,
                             endDate: trough3.timestamp,
                             keyPoints: [trough1, trough2, trough3] + resistancePeaks,
@@ -429,7 +535,7 @@ actor ChartPatternRecognizer {
 
         return ChartPattern(
             type: .ascendingTriangle,
-            confidence: 0.7,
+            confidence: PatternConfidence.ascendingTriangleBase,
             startDate: troughsFirst.timestamp,
             endDate: peaksLast.timestamp,
             keyPoints: troughs + peaks,
@@ -463,7 +569,7 @@ actor ChartPatternRecognizer {
 
         return ChartPattern(
             type: .descendingTriangle,
-            confidence: 0.7,
+            confidence: PatternConfidence.descendingTriangleBase,
             startDate: peaksFirst.timestamp,
             endDate: troughsLast.timestamp,
             keyPoints: peaks + troughs,
@@ -499,7 +605,7 @@ actor ChartPatternRecognizer {
 
         return ChartPattern(
             type: .symmetricalTriangle,
-            confidence: 0.65,
+            confidence: PatternConfidence.symmetricalTriangleBase,
             startDate: min(peaksFirst.timestamp, troughsFirst.timestamp),
             endDate: max(peaksLast.timestamp, troughsLast.timestamp),
             keyPoints: peaks + troughs,
@@ -554,7 +660,7 @@ actor ChartPatternRecognizer {
 
         return ChartPattern(
             type: .risingWedge,
-            confidence: 0.6,
+            confidence: PatternConfidence.risingWedgeBase,
             startDate: min(peaksFirst.timestamp, troughsFirst.timestamp),
             endDate: max(peaksLast.timestamp, troughsLast.timestamp),
             keyPoints: peaks + troughs,
@@ -585,7 +691,7 @@ actor ChartPatternRecognizer {
 
         return ChartPattern(
             type: .fallingWedge,
-            confidence: 0.6,
+            confidence: PatternConfidence.fallingWedgeBase,
             startDate: min(peaksFirst.timestamp, troughsFirst.timestamp),
             endDate: max(peaksLast.timestamp, troughsLast.timestamp),
             keyPoints: peaks + troughs,
@@ -627,7 +733,7 @@ actor ChartPatternRecognizer {
 
             let pattern = ChartPattern(
                 type: .rectangle,
-                confidence: 0.65,
+                confidence: PatternConfidence.rectangleBase,
                 startDate: min(peaksFirst.timestamp, troughsFirst.timestamp),
                 endDate: max(peaksLast.timestamp, troughsLast.timestamp),
                 keyPoints: peaks + troughs,
@@ -693,7 +799,7 @@ actor ChartPatternRecognizer {
         
         return ChartPattern(
             type: .hammer,
-            confidence: 0.6,
+            confidence: PatternConfidence.hammerBase,
             startDate: candle.timestamp,
             endDate: candle.timestamp,
             keyPoints: [PatternPoint(timestamp: candle.timestamp, price: candle.close, type: .support)],
@@ -715,7 +821,7 @@ actor ChartPatternRecognizer {
         
         return ChartPattern(
             type: .shootingStar,
-            confidence: 0.6,
+            confidence: PatternConfidence.shootingStarBase,
             startDate: candle.timestamp,
             endDate: candle.timestamp,
             keyPoints: [PatternPoint(timestamp: candle.timestamp, price: candle.close, type: .resistance)],
@@ -730,7 +836,7 @@ actor ChartPatternRecognizer {
         
         return ChartPattern(
             type: .doji,
-            confidence: 0.5,
+            confidence: PatternConfidence.dojiBase,
             startDate: candle.timestamp,
             endDate: candle.timestamp,
             keyPoints: [PatternPoint(timestamp: candle.timestamp, price: candle.close, type: .support)],
@@ -747,7 +853,7 @@ actor ChartPatternRecognizer {
             
             return ChartPattern(
                 type: .engulfing,
-                confidence: 0.7,
+                confidence: PatternConfidence.engulfingBase,
                 startDate: previous.timestamp,
                 endDate: current.timestamp,
                 keyPoints: [
@@ -766,7 +872,7 @@ actor ChartPatternRecognizer {
             
             return ChartPattern(
                 type: .engulfing,
-                confidence: 0.7,
+                confidence: PatternConfidence.engulfingBase,
                 startDate: previous.timestamp,
                 endDate: current.timestamp,
                 keyPoints: [
@@ -789,7 +895,7 @@ actor ChartPatternRecognizer {
             
             return ChartPattern(
                 type: .morningStar,
-                confidence: 0.8,
+                confidence: PatternConfidence.morningStarBase,
                 startDate: first.timestamp,
                 endDate: third.timestamp,
                 keyPoints: [
@@ -809,7 +915,7 @@ actor ChartPatternRecognizer {
             
             return ChartPattern(
                 type: .eveningStar,
-                confidence: 0.8,
+                confidence: PatternConfidence.eveningStarBase,
                 startDate: first.timestamp,
                 endDate: third.timestamp,
                 keyPoints: [
@@ -834,16 +940,16 @@ actor ChartPatternRecognizer {
         rightShoulder: PatternPoint,
         necklineTroughs: [PatternPoint]
     ) -> Double {
-        var confidence: Double = 0.5
-        
+        var confidence: Double = PatternConfidence.headAndShouldersBase
+
         // Check shoulder symmetry
         let shoulderDiff = abs(leftShoulder.price - rightShoulder.price) / leftShoulder.price
         confidence += (priceTolerancePercent - shoulderDiff) * 10
-        
+
         // Check head prominence
         let headProminence = min(head.price - leftShoulder.price, head.price - rightShoulder.price) / head.price
         confidence += headProminence * 5
-        
+
         // Check neckline consistency
         if necklineTroughs.count >= 2 {
             let necklinePrices = necklineTroughs.map { $0.price }
@@ -854,35 +960,38 @@ actor ChartPatternRecognizer {
                 confidence += (priceTolerancePercent - necklineVariation) * 5
             }
         }
-        
-        return min(confidence, 1.0)
+
+        // Clamp both bounds: shoulderDiff multiplier of 10 can push the
+        // value above 1.0; if invariants ever loosen at the call site the
+        // same term could push it below 0.0. Guarantee [0, 1].
+        return max(PatternConfidence.minimum, min(PatternConfidence.maximum, confidence))
     }
-    
+
     private func calculateDoubleTopConfidence(firstPeak: PatternPoint, secondPeak: PatternPoint, valley: PatternPoint) -> Double {
-        var confidence: Double = 0.5
-        
+        var confidence: Double = PatternConfidence.doubleTopBase
+
         // Check peak similarity
         let peakDiff = abs(firstPeak.price - secondPeak.price) / firstPeak.price
         confidence += (priceTolerancePercent - peakDiff) * 15
-        
+
         // Check valley depth
         let valleyDepth = (firstPeak.price - valley.price) / firstPeak.price
         confidence += min(valleyDepth * 5, 0.3)
-        
-        return min(confidence, 1.0)
+
+        return max(PatternConfidence.minimum, min(PatternConfidence.maximum, confidence))
     }
-    
+
     private func calculateDoubleBottomConfidence(firstTrough: PatternPoint, secondTrough: PatternPoint, peak: PatternPoint) -> Double {
-        var confidence: Double = 0.5
-        
+        var confidence: Double = PatternConfidence.doubleBottomBase
+
         // Check trough similarity
         let troughDiff = abs(firstTrough.price - secondTrough.price) / firstTrough.price
         confidence += (priceTolerancePercent - troughDiff) * 15
-        
+
         // Check peak height
         let peakHeight = (peak.price - firstTrough.price) / firstTrough.price
         confidence += min(peakHeight * 5, 0.3)
-        
-        return min(confidence, 1.0)
+
+        return max(PatternConfidence.minimum, min(PatternConfidence.maximum, confidence))
     }
 }

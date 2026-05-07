@@ -248,7 +248,7 @@ struct StdioIntegrationTests {
     @Test("Legacy SimpleMCP transport lists all 16 tools")
     func legacyTransportListsAllSixteenTools() async throws {
         let responses = try await runMCP(
-            args: ["--transport", "stdio"],
+            args: ["--use-legacy"],
             requests: [JSONRPCRequest.initialize, JSONRPCRequest.toolsList]
         )
 
@@ -275,10 +275,10 @@ struct StdioIntegrationTests {
 
     // MARK: - Test 2: SDK transport
 
-    @Test("SDK transport (--use-sdk) lists all 16 tools")
+    @Test("SDK transport (default) lists all 16 tools")
     func sdkTransportListsAllSixteenTools() async throws {
         let responses = try await runMCP(
-            args: ["--use-sdk"],
+            args: [],
             requests: [JSONRPCRequest.initialize, JSONRPCRequest.toolsList]
         )
 
@@ -309,7 +309,7 @@ struct StdioIntegrationTests {
         // We assert on the *shape* of the response, not the body,
         // because the body depends on whether the network is reachable.
         let responses = try await runMCP(
-            args: ["--use-sdk"],
+            args: [],
             requests: [
                 JSONRPCRequest.initialize,
                 JSONRPCRequest.getAvailableNetworks

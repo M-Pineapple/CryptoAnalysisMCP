@@ -243,11 +243,11 @@ actor CryptoAnalysisHandler {
     
     // MARK: - Tool Implementation Methods
     
-    func getCurrentPrice(arguments: [String: Any]) async -> [String: Any] {
+    func getCurrentPrice(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let symbol = arguments["symbol"] as? String else {
             return ["error": "Symbol is required"]
         }
-        
+
         do {
             let priceData = try await dataProvider.getCurrentPrice(symbol: symbol.uppercased())
             logger.info("Retrieved price data for \(symbol): $\(String(format: "%.2f", priceData.price))")
@@ -257,8 +257,8 @@ actor CryptoAnalysisHandler {
             return ["error": "Failed to fetch price data: \(error.localizedDescription)"]
         }
     }
-    
-    func getTechnicalIndicators(arguments: [String: Any]) async -> [String: Any] {
+
+    func getTechnicalIndicators(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let symbol = arguments["symbol"] as? String else {
             return ["error": "Symbol is required"]
         }
@@ -294,7 +294,7 @@ actor CryptoAnalysisHandler {
         }
     }
     
-    func detectChartPatterns(arguments: [String: Any]) async -> [String: Any] {
+    func detectChartPatterns(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let symbol = arguments["symbol"] as? String else {
             return ["error": "Symbol is required"]
         }
@@ -329,7 +329,7 @@ actor CryptoAnalysisHandler {
         }
     }
     
-    func getMultiTimeframeAnalysis(arguments: [String: Any]) async -> [String: Any] {
+    func getMultiTimeframeAnalysis(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let symbol = arguments["symbol"] as? String else {
             return ["error": "Symbol is required"]
         }
@@ -374,7 +374,7 @@ actor CryptoAnalysisHandler {
         ]
     }
     
-    func getTradingSignals(arguments: [String: Any]) async -> [String: Any] {
+    func getTradingSignals(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let symbol = arguments["symbol"] as? String else {
             return ["error": "Symbol is required"]
         }
@@ -416,7 +416,7 @@ actor CryptoAnalysisHandler {
         }
     }
     
-    func getSupportResistance(arguments: [String: Any]) async -> [String: Any] {
+    func getSupportResistance(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let symbol = arguments["symbol"] as? String else {
             return ["error": "Symbol is required"]
         }
@@ -449,7 +449,7 @@ actor CryptoAnalysisHandler {
         }
     }
     
-    func getFullAnalysis(arguments: [String: Any]) async -> [String: Any] {
+    func getFullAnalysis(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let symbol = arguments["symbol"] as? String else {
             return ["error": "Symbol is required"]
         }

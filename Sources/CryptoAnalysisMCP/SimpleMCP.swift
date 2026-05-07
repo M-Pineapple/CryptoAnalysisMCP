@@ -133,29 +133,34 @@ struct MCPResponse: Codable {
 }
 
 /// MCP Error
-struct MCPError: Codable, Error {
+struct MCPError: Codable, Error, Sendable {
     let code: Int
     let message: String
-    let data: [String: Any]?
-    
+    let data: [String: any Sendable]?
+
     private enum CodingKeys: String, CodingKey {
         case code, message, data
     }
-    
-    init(code: Int, message: String, data: [String: Any]? = nil) {
+
+    init(code: Int, message: String, data: [String: any Sendable]? = nil) {
         self.code = code
         self.message = message
         self.data = data
     }
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.code = try container.decode(Int.self, forKey: .code)
         self.message = try container.decode(String.self, forKey: .message)
-        
+
         if container.contains(.data) {
+            // Decode through the existing [String: Any] JSON-coding path,
+            // then bridge into [String: any Sendable]. JSON values are
+            // restricted to Bool/String/Int/Double/dict/array — all Sendable —
+            // so this conversion is total but cannot be expressed as a
+            // runtime cast (Sendable is a marker protocol).
             if let dataDict = try? container.decode([String: Any].self, forKey: .data) {
-                self.data = dataDict
+                self.data = MCPError.bridgeJSONDict(dataDict)
             } else {
                 self.data = nil
             }
@@ -163,14 +168,45 @@ struct MCPError: Codable, Error {
             self.data = nil
         }
     }
-    
+
+    /// Convert a JSON-decoded `[String: Any]` to `[String: any Sendable]`.
+    /// Supported leaf types match the JSONCodingKey extension above.
+    private static func bridgeJSONDict(_ dict: [String: Any]) -> [String: any Sendable] {
+        var out: [String: any Sendable] = [:]
+        for (key, value) in dict {
+            if let v = bridgeJSONValue(value) {
+                out[key] = v
+            }
+        }
+        return out
+    }
+
+    private static func bridgeJSONArray(_ array: [Any]) -> [any Sendable] {
+        array.compactMap(bridgeJSONValue)
+    }
+
+    private static func bridgeJSONValue(_ value: Any) -> (any Sendable)? {
+        switch value {
+        case let v as Bool: return v
+        case let v as Int: return v
+        case let v as Double: return v
+        case let v as String: return v
+        case let v as [String: Any]: return bridgeJSONDict(v)
+        case let v as [Any]: return bridgeJSONArray(v)
+        default: return nil
+        }
+    }
+
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(code, forKey: .code)
         try container.encode(message, forKey: .message)
-        
+
         if let data = data {
-            try container.encode(data, forKey: .data)
+            // Bridge [String: any Sendable] → [String: Any] for the existing
+            // JSON-coding extension. The runtime values are unchanged.
+            let asAny: [String: Any] = data.mapValues { $0 as Any }
+            try container.encode(asAny, forKey: .data)
         }
     }
 }
@@ -180,9 +216,14 @@ struct MCPTool {
     let name: String
     let description: String
     let inputSchema: [String: Any]
-    let handler: ([String: Any]) async -> [String: Any]
-    
-    init(name: String, description: String, inputSchema: [String: Any], handler: @escaping ([String: Any]) async -> [String: Any]) {
+    let handler: @Sendable (sending [String: Any]) async -> sending [String: Any]
+
+    init(
+        name: String,
+        description: String,
+        inputSchema: [String: Any],
+        handler: @escaping @Sendable (sending [String: Any]) async -> sending [String: Any]
+    ) {
         self.name = name
         self.description = description
         self.inputSchema = inputSchema
@@ -324,7 +365,7 @@ class MCPServer {
         await sendResponse(id: id, result: ["tools": toolsList])
     }
     
-    private func handleToolCall(id: Int, params: [String: Any]?) async {
+    private func handleToolCall(id: Int, params: sending [String: Any]?) async {
         guard let params = params,
               let toolName = params["name"] as? String,
               let arguments = params["arguments"] as? [String: Any] else {

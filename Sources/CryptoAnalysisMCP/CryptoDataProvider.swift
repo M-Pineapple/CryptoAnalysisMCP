@@ -7,9 +7,6 @@ actor CryptoDataProvider: DataProvider {
 
     var providerName: String { "CoinPaprika" }
 
-    // DexPaprika provider for 7+ million tokens!
-    let dexPaprikaProvider = DexPaprikaDataProvider()
-    
     // CoinPaprika API configuration. Free tier uses api.coinpaprika.com;
     // paid plans (Starter / Pro / Business / Ultimate / Enterprise) live on
     // a separate hostname, api-pro.coinpaprika.com. Switch automatically

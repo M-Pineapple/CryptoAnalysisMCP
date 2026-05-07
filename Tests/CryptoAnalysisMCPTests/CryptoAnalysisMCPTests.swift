@@ -9,11 +9,11 @@ final class CryptoAnalysisMCPTests: XCTestCase {
         let analyzer = TechnicalAnalyzer()
         
         // Test SMA calculation
-        let smaResults = analyzer.calculateSMA(data: testData, period: 5)
+        let smaResults = await analyzer.calculateSMA(data: testData, period: 5)
         XCTAssertFalse(smaResults.isEmpty, "SMA results should not be empty")
-        
+
         // Test RSI calculation
-        let rsiResults = analyzer.calculateRSI(data: testData, period: 14)
+        let rsiResults = await analyzer.calculateRSI(data: testData, period: 14)
         XCTAssertFalse(rsiResults.isEmpty, "RSI results should not be empty")
         
         if let lastRSI = rsiResults.last {

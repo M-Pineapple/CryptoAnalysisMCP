@@ -2,7 +2,22 @@ import XCTest
 @testable import CryptoAnalysisMCP
 
 final class CryptoAnalysisMCPTests: XCTestCase {
-    
+
+    private struct SeededRNG {
+        private var state: UInt64
+        init(seed: UInt64) { state = seed == 0 ? 1 : seed }
+        mutating func next() -> UInt64 {
+            state = state &* 6_364_136_223_846_793_005 &+ 1_442_695_040_888_963_407
+            return state
+        }
+        mutating func nextDouble(in range: ClosedRange<Double>) -> Double {
+            let r = Double(next() >> 11) / Double(1 << 53)
+            return range.lowerBound + r * (range.upperBound - range.lowerBound)
+        }
+    }
+
+    private static let fixtureBaseDate = Date(timeIntervalSince1970: 1_700_000_000)
+
     func testTechnicalIndicatorCalculations() async throws {
         // Test data - simple ascending price pattern
         let testData = createTestCandleData()
@@ -109,19 +124,23 @@ final class CryptoAnalysisMCPTests: XCTestCase {
     
     private func createTestCandleData() -> [CandleData] {
         var candles: [CandleData] = []
-        let baseTime = Date().addingTimeInterval(-30 * 24 * 60 * 60) // 30 days ago
-        
+        let baseTime = Self.fixtureBaseDate
+        // Seed chosen so SupportResistanceAnalyzer finds at least one 2-touch level
+        // in the resulting candle stream. 0xC0FFEE and 0xDEAD_BEEF produced streams
+        // where every detected level had only 1 touch; 0xFEED_FACE works.
+        var rng = SeededRNG(seed: 0xFEED_FACE)
+
         for i in 0..<30 {
             let timestamp = baseTime.addingTimeInterval(Double(i) * 24 * 60 * 60)
             let basePrice = 100.0 + Double(i) // Ascending trend
-            let volatility = Double.random(in: 0.95...1.05)
-            
+            let volatility = rng.nextDouble(in: 0.95...1.05)
+
             let open = basePrice * volatility
-            let close = basePrice * Double.random(in: 0.98...1.02)
-            let high = max(open, close) * Double.random(in: 1.0...1.03)
-            let low = min(open, close) * Double.random(in: 0.97...1.0)
-            let volume = Double.random(in: 1000...10000)
-            
+            let close = basePrice * rng.nextDouble(in: 0.98...1.02)
+            let high = max(open, close) * rng.nextDouble(in: 1.0...1.03)
+            let low = min(open, close) * rng.nextDouble(in: 0.97...1.0)
+            let volume = rng.nextDouble(in: 1000...10000)
+
             candles.append(CandleData(
                 timestamp: timestamp,
                 open: open,
@@ -131,14 +150,15 @@ final class CryptoAnalysisMCPTests: XCTestCase {
                 volume: volume
             ))
         }
-        
+
         return candles
     }
     
     private func createHeadAndShouldersPattern() -> [CandleData] {
         var candles: [CandleData] = []
-        let baseTime = Date().addingTimeInterval(-20 * 24 * 60 * 60)
-        
+        let baseTime = Self.fixtureBaseDate.addingTimeInterval(-10 * 86_400)
+        var rng = SeededRNG(seed: 0xBADC0DE)
+
         // Create a head and shoulders pattern
         let prices: [Double] = [
             100, 105, 110, 108, 105, // Left shoulder
@@ -146,17 +166,17 @@ final class CryptoAnalysisMCPTests: XCTestCase {
             110, 108, 112, 110, 108, // Right shoulder
             105, 102, 100, 98, 95    // Breakdown
         ]
-        
+
         for (i, price) in prices.enumerated() {
             let timestamp = baseTime.addingTimeInterval(Double(i) * 24 * 60 * 60)
-            let volatility = Double.random(in: 0.98...1.02)
-            
+            let volatility = rng.nextDouble(in: 0.98...1.02)
+
             let close = price * volatility
-            let open = close * Double.random(in: 0.99...1.01)
-            let high = max(open, close) * Double.random(in: 1.0...1.02)
-            let low = min(open, close) * Double.random(in: 0.98...1.0)
-            let volume = Double.random(in: 1000...5000)
-            
+            let open = close * rng.nextDouble(in: 0.99...1.01)
+            let high = max(open, close) * rng.nextDouble(in: 1.0...1.02)
+            let low = min(open, close) * rng.nextDouble(in: 0.98...1.0)
+            let volume = rng.nextDouble(in: 1000...5000)
+
             candles.append(CandleData(
                 timestamp: timestamp,
                 open: open,
@@ -166,7 +186,7 @@ final class CryptoAnalysisMCPTests: XCTestCase {
                 volume: volume
             ))
         }
-        
+
         return candles
     }
 }

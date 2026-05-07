@@ -67,12 +67,12 @@ struct PriceData {
 }
 
 /// Technical indicator results
-struct IndicatorResult {
+struct IndicatorResult: Sendable {
     let name: String
     let value: Double
     let signal: TradingSignal
     let timestamp: Date
-    let parameters: [String: Any]
+    let parameters: [String: any Sendable]
 }
 
 /// Trading signal enumeration

@@ -4,10 +4,10 @@ import Logging
 // MARK: - v1.1 DexPaprika Tool Registration
 
 extension CryptoAnalysisMCP {
-    func registerDexPaprikaTools(server: MCPServer, handler: CryptoAnalysisHandler) async {
+    func registerDexPaprikaTools(server: any ToolRegistrar, handler: CryptoAnalysisHandler) async {
         
         // MARK: - Token Liquidity Tool
-        server.addTool(MCPTool(
+        await server.register(MCPTool(
             name: "get_token_liquidity",
             description: "Get liquidity information for a token across all DEXes",
             inputSchema: createToolSchema(
@@ -28,7 +28,7 @@ extension CryptoAnalysisMCP {
         })
         
         // MARK: - Search Tokens by Network
-        server.addTool(MCPTool(
+        await server.register(MCPTool(
             name: "search_tokens_by_network",
             description: "Search for tokens on a specific blockchain network",
             inputSchema: createToolSchema(
@@ -53,7 +53,7 @@ extension CryptoAnalysisMCP {
         })
         
         // MARK: - Compare DEX Prices
-        server.addTool(MCPTool(
+        await server.register(MCPTool(
             name: "compare_dex_prices",
             description: "Compare token prices across different DEXes on the same network",
             inputSchema: createToolSchema(
@@ -74,7 +74,7 @@ extension CryptoAnalysisMCP {
         })
         
         // MARK: - Get Network Pools
-        server.addTool(MCPTool(
+        await server.register(MCPTool(
             name: "get_network_pools",
             description: "Get top liquidity pools on a specific network",
             inputSchema: createToolSchema(
@@ -99,7 +99,7 @@ extension CryptoAnalysisMCP {
         })
         
         // MARK: - Get DEX Info
-        server.addTool(MCPTool(
+        await server.register(MCPTool(
             name: "get_dex_info",
             description: "Get information about DEXes available on a network",
             inputSchema: createToolSchema(
@@ -116,7 +116,7 @@ extension CryptoAnalysisMCP {
         })
         
         // MARK: - Get Pool Analytics
-        server.addTool(MCPTool(
+        await server.register(MCPTool(
             name: "get_pool_analytics",
             description: "Get detailed analytics for a specific liquidity pool",
             inputSchema: createToolSchema(
@@ -137,7 +137,7 @@ extension CryptoAnalysisMCP {
         })
         
         // MARK: - Get Pool OHLCV
-        server.addTool(MCPTool(
+        await server.register(MCPTool(
             name: "get_pool_ohlcv",
             description: "Get historical OHLCV (candlestick) data for a liquidity pool",
             inputSchema: createToolSchema(
@@ -170,7 +170,7 @@ extension CryptoAnalysisMCP {
         })
         
         // MARK: - Get Available Networks
-        server.addTool(MCPTool(
+        await server.register(MCPTool(
             name: "get_available_networks",
             description: "Get list of all supported blockchain networks",
             inputSchema: createToolSchema(
@@ -182,7 +182,7 @@ extension CryptoAnalysisMCP {
         })
         
         // MARK: - Advanced Token Search
-        server.addTool(MCPTool(
+        await server.register(MCPTool(
             name: "search_tokens_advanced",
             description: "Advanced token search across all networks with filters",
             inputSchema: createToolSchema(
@@ -216,7 +216,7 @@ extension CryptoAnalysisMCP {
 
 extension CryptoAnalysisHandler {
     
-    func getTokenLiquidity(arguments: [String: Any]) async -> [String: Any] {
+    func getTokenLiquidity(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let symbol = arguments["symbol"] as? String else {
             return ["error": "Symbol is required"]
         }
@@ -283,7 +283,7 @@ extension CryptoAnalysisHandler {
         }
     }
     
-    func searchTokensByNetwork(arguments: [String: Any]) async -> [String: Any] {
+    func searchTokensByNetwork(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let network = arguments["network"] as? String else {
             return ["error": "Network is required"]
         }
@@ -370,7 +370,7 @@ extension CryptoAnalysisHandler {
         }
     }
     
-    func compareDexPrices(arguments: [String: Any]) async -> [String: Any] {
+    func compareDexPrices(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let symbol = arguments["symbol"] as? String,
               let network = arguments["network"] as? String else {
             return ["error": "Both symbol and network are required"]
@@ -439,7 +439,7 @@ extension CryptoAnalysisHandler {
         }
     }
     
-    func getNetworkPools(arguments: [String: Any]) async -> [String: Any] {
+    func getNetworkPools(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let network = arguments["network"] as? String else {
             return ["error": "Network is required"]
         }
@@ -485,7 +485,7 @@ extension CryptoAnalysisHandler {
         }
     }
     
-    func getDexInfo(arguments: [String: Any]) async -> [String: Any] {
+    func getDexInfo(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let network = arguments["network"] as? String else {
             return ["error": "Network is required"]
         }
@@ -516,7 +516,7 @@ extension CryptoAnalysisHandler {
         }
     }
     
-    func getPoolAnalytics(arguments: [String: Any]) async -> [String: Any] {
+    func getPoolAnalytics(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let network = arguments["network"] as? String,
               let poolAddress = arguments["pool_address"] as? String else {
             return ["error": "Both network and pool_address are required"]
@@ -576,7 +576,7 @@ extension CryptoAnalysisHandler {
         }
     }
     
-    func getPoolOHLCV(arguments: [String: Any]) async -> [String: Any] {
+    func getPoolOHLCV(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let network = arguments["network"] as? String,
               let poolAddress = arguments["pool_address"] as? String,
               let startDate = arguments["start_date"] as? String else {
@@ -638,7 +638,7 @@ extension CryptoAnalysisHandler {
         }
     }
     
-    func getAvailableNetworks(arguments: [String: Any]) async -> [String: Any] {
+    func getAvailableNetworks(arguments: sending [String: Any]) async -> sending [String: Any] {
         do {
             let dexProvider = await dexPaprikaProvider
             let networks = try await dexProvider.getNetworks()
@@ -665,7 +665,7 @@ extension CryptoAnalysisHandler {
         }
     }
     
-    func searchTokensAdvanced(arguments: [String: Any]) async -> [String: Any] {
+    func searchTokensAdvanced(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let query = arguments["query"] as? String else {
             return ["error": "Query is required"]
         }

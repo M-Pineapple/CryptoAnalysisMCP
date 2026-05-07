@@ -5,6 +5,19 @@ All notable changes to CryptoAnalysisMCP will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-05-07
+
+### Added
+- **`--use-sdk` flag** opting into the official `mcp-swift-sdk` (v0.12.1) transport. Default behavior remains the in-tree `SimpleMCP` for compatibility — the SDK becomes default in v1.3 after wider testing. Both paths serve the same 16 tools through a shared `ToolRegistrar` protocol.
+- `MCPSDKBridge` final class wraps the SDK's `Server` and reuses the existing `MCPTool` registration surface. Translates `[String: Any]` schemas and arguments to/from the SDK's `Value` enum at the boundary, so the SDK handler closures only capture Sendable storage.
+
+### Changed
+- Bumped Swift toolchain to 6.1 (required by `mcp-swift-sdk`). All strict-concurrency diagnostics resolved without `@unchecked Sendable` escape hatches.
+- `registerTools` / `registerDexPaprikaTools` now accept `any ToolRegistrar` (instead of `MCPServer` directly) so both backends share registration call sites.
+
+### Note
+- Existing default (`SimpleMCP`) path is unchanged. Both transports speak valid JSON-RPC 2.0 with the same tool name/schema set; minor wire formatting differs (the SDK uses `[.sortedKeys, .withoutEscapingSlashes]` and emits `description: null` for tools without one — semantically equivalent).
+
 ## [1.2.0] - 2026-05-07
 
 ### Fixed (Breaking)

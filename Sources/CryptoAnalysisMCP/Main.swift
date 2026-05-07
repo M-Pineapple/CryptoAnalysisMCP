@@ -7,7 +7,7 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "crypto-analysis-mcp",
         abstract: "A Model Context Protocol server for cryptocurrency technical analysis",
-        version: "1.1.0"
+        version: "1.2.0"
     )
     
     @Option(help: "Transport method")
@@ -32,7 +32,7 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
         }
         
         let logger = Logger(label: "CryptoAnalysisMCP")
-        logger.info("🚀 Starting Crypto Analysis MCP Server v1.1.0")
+        logger.info("🚀 Starting Crypto Analysis MCP Server v1.2.0")
         
         // Create the analysis handler
         let analysisHandler = CryptoAnalysisHandler()
@@ -40,7 +40,7 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
         // Create the MCP server
         let server = MCPServer(
             name: "crypto-analysis",
-            version: "1.1.0",
+            version: "1.2.0",
             debugMode: debug
         )
         
@@ -50,7 +50,7 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
         // Register v1.1 DexPaprika tools
         await registerDexPaprikaTools(server: server, handler: analysisHandler)
         
-        logger.info("✅ Registered crypto analysis tools (v1.1 with full DexPaprika integration)")
+        logger.info("✅ Registered crypto analysis tools (v1.2 with quality bundle + DataProvider protocol)")
         
         // Start the server based on transport
         switch transport {

@@ -4,9 +4,10 @@ import MCP
 
 // MARK: - SDK Bridge
 //
-// Side-by-side opt-in path that wires the existing 16-tool surface onto the
-// official `mcp-swift-sdk` (v0.12.1). Selected via `--use-sdk`. Default
-// behavior remains the in-tree `SimpleMCP` implementation in `SimpleMCP.swift`.
+// Default transport as of v1.3 — wires the 16-tool surface onto the official
+// `mcp-swift-sdk` (v0.12.1). The legacy in-tree `SimpleMCP` implementation
+// is still available via `--use-legacy` as a one-release safety valve;
+// SimpleMCP is removed in v1.4.
 //
 // Note: the SDK exposes its own `MCPError` enum in module `MCP`, which
 // collides by name with the local struct of the same name in `SimpleMCP.swift`.

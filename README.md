@@ -10,6 +10,19 @@ A Model Context Protocol (MCP) server for comprehensive cryptocurrency technical
 
 ⚠️ **IMPORTANT FOR DAY TRADERS**: This tool requires a $99/mo Pro subscription for intraday analysis. The free tier only supports daily candles, making it suitable for swing traders and long-term investors only.
 
+## ⚠️ Disclaimer
+
+CryptoAnalysisMCP is provided **for informational and educational purposes only**. It is **not** financial, investment, trading, or tax advice, and nothing it outputs should be treated as a recommendation to buy, sell, or hold any asset.
+
+- Technical indicators, chart patterns, and trading signals are computed from public market data using well-known formulas. They are imperfect, can be wrong, and offer no predictive guarantee.
+- Cryptocurrency markets are highly volatile. You can lose your entire investment — and more than you put in if you use leverage or margin. Never trade with money you cannot afford to lose.
+- Past performance — including any examples, backtests, or sample outputs in this repository — does not predict future returns.
+- The author and contributors are not licensed financial advisors. This project is not affiliated with, endorsed by, or operated by any exchange, broker, regulator, or data provider.
+- Always do your own research (DYOR), consult a qualified financial professional about your specific situation, and verify any data this tool produces against an authoritative source before acting on it.
+- The software is provided "as is", without warranty of any kind, per the [MIT License](LICENSE). The author and contributors are not liable for any losses, damages, or consequences arising from your use of this tool.
+
+**By using CryptoAnalysisMCP you acknowledge and accept these terms.** See [DISCLAIMER.md](DISCLAIMER.md) for the full text.
+
 ## 🆕 What's New in v1.1
 
 ### 🌟 DexPaprika Integration - 7+ MILLION Tokens!
@@ -173,13 +186,7 @@ You're trying to use features that require a Pro subscription:
 
 ### How accurate are the trading signals?
 
-⚠️ **Important**: Trading signals are for informational purposes only!
-
-- Based on well-established technical indicators
-- No prediction is 100% accurate
-- Always do your own research
-- Never invest more than you can afford to lose
-- Consider multiple factors beyond technical analysis
+Trading signals are for informational purposes only — see the [Disclaimer](#%EF%B8%8F-disclaimer) at the top of this README and the full [DISCLAIMER.md](DISCLAIMER.md). They are based on well-established technical indicators but no prediction is 100% accurate. Always do your own research and never invest more than you can afford to lose.
 
 ### Can I use this for automated trading?
 

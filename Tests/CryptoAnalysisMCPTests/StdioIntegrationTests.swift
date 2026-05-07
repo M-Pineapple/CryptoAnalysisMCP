@@ -261,7 +261,7 @@ struct StdioIntegrationTests {
         #expect(initResult["protocolVersion"] as? String == "2024-11-05")
         let serverInfo = try #require(initResult["serverInfo"] as? [String: Any], "missing serverInfo")
         #expect(serverInfo["name"] as? String == "crypto-analysis")
-        #expect(serverInfo["version"] as? String == "1.2.1")
+        #expect(serverInfo["version"] as? String == "1.3.0")
 
         // tools/list response
         let listResp = try #require(response(id: 2, in: responses), "No tools/list response")
@@ -289,7 +289,7 @@ struct StdioIntegrationTests {
         #expect(initResult["protocolVersion"] as? String == "2024-11-05")
         let serverInfo = try #require(initResult["serverInfo"] as? [String: Any], "missing serverInfo")
         #expect(serverInfo["name"] as? String == "crypto-analysis")
-        #expect(serverInfo["version"] as? String == "1.2.1")
+        #expect(serverInfo["version"] as? String == "1.3.0")
 
         let listResp = try #require(response(id: 2, in: responses), "No tools/list response")
         let names = toolNames(from: listResp)

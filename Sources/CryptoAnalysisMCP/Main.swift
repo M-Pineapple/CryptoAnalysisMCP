@@ -7,7 +7,7 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "crypto-analysis-mcp",
         abstract: "A Model Context Protocol server for cryptocurrency technical analysis",
-        version: "1.2.1"
+        version: "1.3.0"
     )
     
     @Option(help: "Transport method")
@@ -35,7 +35,7 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
         }
         
         let logger = Logger(label: "CryptoAnalysisMCP")
-        logger.info("🚀 Starting Crypto Analysis MCP Server v1.2.1")
+        logger.info("🚀 Starting Crypto Analysis MCP Server v1.3.0")
 
         // Create the analysis handler
         let analysisHandler = CryptoAnalysisHandler()
@@ -47,7 +47,7 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
 
         if useSDK {
             // SDK path: official mcp-swift-sdk
-            let bridge = MCPSDKBridge(name: "crypto-analysis", version: "1.2.1")
+            let bridge = MCPSDKBridge(name: "crypto-analysis", version: "1.3.0")
             await registerTools(server: bridge, handler: analysisHandler)
             await registerDexPaprikaTools(server: bridge, handler: analysisHandler)
             logger.info("✅ Registered crypto analysis tools via mcp-swift-sdk (--use-sdk)")
@@ -56,7 +56,7 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
             // Legacy path: in-tree SimpleMCP
             let server = MCPServer(
                 name: "crypto-analysis",
-                version: "1.2.1",
+                version: "1.3.0",
                 debugMode: debug
             )
             await registerTools(server: server, handler: analysisHandler)

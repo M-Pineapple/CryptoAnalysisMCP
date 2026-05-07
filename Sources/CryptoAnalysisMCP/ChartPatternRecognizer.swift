@@ -292,9 +292,9 @@ actor ChartPatternRecognizer {
                         $0.timestamp > peak1.timestamp && $0.timestamp < peak3.timestamp 
                     }
                     
-                    if supportingTroughs.count >= 2 {
+                    if supportingTroughs.count >= 2,
+                       let lowestTrough = supportingTroughs.min(by: { $0.price < $1.price }) {
                         let avgPeakPrice = (peak1.price + peak2.price + peak3.price) / 3
-                        let lowestTrough = supportingTroughs.min { $0.price < $1.price }!
                         let target = lowestTrough.price - (avgPeakPrice - lowestTrough.price)
                         
                         let pattern = ChartPattern(
@@ -334,9 +334,9 @@ actor ChartPatternRecognizer {
                         $0.timestamp > trough1.timestamp && $0.timestamp < trough3.timestamp 
                     }
                     
-                    if resistancePeaks.count >= 2 {
+                    if resistancePeaks.count >= 2,
+                       let highestPeak = resistancePeaks.max(by: { $0.price < $1.price }) {
                         let avgTroughPrice = (trough1.price + trough2.price + trough3.price) / 3
-                        let highestPeak = resistancePeaks.max { $0.price < $1.price }!
                         let target = highestPeak.price + (highestPeak.price - avgTroughPrice)
                         
                         let pattern = ChartPattern(
@@ -407,90 +407,105 @@ actor ChartPatternRecognizer {
     
     private func detectAscendingTriangle(peaks: [PatternPoint], troughs: [PatternPoint]) -> ChartPattern? {
         guard peaks.count >= 2 && troughs.count >= 2 else { return nil }
-        
+        guard let peaksLast = peaks.last,
+              let troughsFirst = troughs.first,
+              let troughsLast = troughs.last else { return nil }
+
         // Check for horizontal resistance (peaks at similar levels)
         let peakPrices = peaks.map { $0.price }
-        let peakVariation = (peakPrices.max()! - peakPrices.min()!) / peakPrices.min()!
-        
+        guard let peakMax = peakPrices.max(),
+              let peakMin = peakPrices.min(),
+              peakMin > 0 else { return nil }
+        let peakVariation = (peakMax - peakMin) / peakMin
+
         guard peakVariation <= priceTolerancePercent else { return nil }
-        
+
         // Check for rising support (ascending trough trend)
-        guard troughs.count >= 2 else { return nil }
-        let isRising = troughs.last!.price > troughs.first!.price
+        let isRising = troughsLast.price > troughsFirst.price
         guard isRising else { return nil }
-        
+
         let resistanceLevel = peakPrices.reduce(0, +) / Double(peakPrices.count)
         let target = resistanceLevel + (resistanceLevel * 0.05) // 5% above resistance
-        
+
         return ChartPattern(
             type: .ascendingTriangle,
             confidence: 0.7,
-            startDate: troughs.first!.timestamp,
-            endDate: peaks.last!.timestamp,
+            startDate: troughsFirst.timestamp,
+            endDate: peaksLast.timestamp,
             keyPoints: troughs + peaks,
             description: "Ascending Triangle pattern. Bullish continuation signal.",
             target: target,
-            stopLoss: troughs.last!.price
+            stopLoss: troughsLast.price
         )
     }
     
     private func detectDescendingTriangle(peaks: [PatternPoint], troughs: [PatternPoint]) -> ChartPattern? {
         guard peaks.count >= 2 && troughs.count >= 2 else { return nil }
-        
+        guard let peaksFirst = peaks.first,
+              let peaksLast = peaks.last,
+              let troughsLast = troughs.last else { return nil }
+
         // Check for horizontal support (troughs at similar levels)
         let troughPrices = troughs.map { $0.price }
-        let troughVariation = (troughPrices.max()! - troughPrices.min()!) / troughPrices.min()!
-        
+        guard let troughMax = troughPrices.max(),
+              let troughMin = troughPrices.min(),
+              troughMin > 0 else { return nil }
+        let troughVariation = (troughMax - troughMin) / troughMin
+
         guard troughVariation <= priceTolerancePercent else { return nil }
-        
+
         // Check for falling resistance (descending peak trend)
-        guard peaks.count >= 2 else { return nil }
-        let isFalling = peaks.last!.price < peaks.first!.price
+        let isFalling = peaksLast.price < peaksFirst.price
         guard isFalling else { return nil }
-        
+
         let supportLevel = troughPrices.reduce(0, +) / Double(troughPrices.count)
         let target = supportLevel - (supportLevel * 0.05) // 5% below support
-        
+
         return ChartPattern(
             type: .descendingTriangle,
             confidence: 0.7,
-            startDate: peaks.first!.timestamp,
-            endDate: troughs.last!.timestamp,
+            startDate: peaksFirst.timestamp,
+            endDate: troughsLast.timestamp,
             keyPoints: peaks + troughs,
             description: "Descending Triangle pattern. Bearish continuation signal.",
             target: target,
-            stopLoss: peaks.last!.price
+            stopLoss: peaksLast.price
         )
     }
     
     private func detectSymmetricalTriangle(peaks: [PatternPoint], troughs: [PatternPoint]) -> ChartPattern? {
         guard peaks.count >= 2 && troughs.count >= 2 else { return nil }
-        
+        guard let peaksFirst = peaks.first,
+              let peaksLast = peaks.last,
+              let troughsFirst = troughs.first,
+              let troughsLast = troughs.last else { return nil }
+
         // Check if peaks are descending and troughs are ascending (converging)
-        let peaksDescending = peaks.last!.price < peaks.first!.price
-        let troughsAscending = troughs.last!.price > troughs.first!.price
-        
+        let peaksDescending = peaksLast.price < peaksFirst.price
+        let troughsAscending = troughsLast.price > troughsFirst.price
+
         guard peaksDescending && troughsAscending else { return nil }
-        
+
         // Calculate convergence
-        let priceRange = peaks.first!.price - troughs.first!.price
-        let currentRange = peaks.last!.price - troughs.last!.price
+        let priceRange = peaksFirst.price - troughsFirst.price
+        let currentRange = peaksLast.price - troughsLast.price
+        guard priceRange > 0 else { return nil }
         let compression = (priceRange - currentRange) / priceRange
-        
+
         guard compression > 0.3 else { return nil } // At least 30% compression
-        
-        let midPoint = (peaks.last!.price + troughs.last!.price) / 2
+
+        let midPoint = (peaksLast.price + troughsLast.price) / 2
         let target = midPoint + (priceRange * 0.5) // Breakout target
-        
+
         return ChartPattern(
             type: .symmetricalTriangle,
             confidence: 0.65,
-            startDate: min(peaks.first!.timestamp, troughs.first!.timestamp),
-            endDate: max(peaks.last!.timestamp, troughs.last!.timestamp),
+            startDate: min(peaksFirst.timestamp, troughsFirst.timestamp),
+            endDate: max(peaksLast.timestamp, troughsLast.timestamp),
             keyPoints: peaks + troughs,
             description: "Symmetrical Triangle pattern. Neutral continuation signal.",
             target: target,
-            stopLoss: troughs.last!.price
+            stopLoss: troughsLast.price
         )
     }
     
@@ -520,92 +535,110 @@ actor ChartPatternRecognizer {
     
     private func detectRisingWedge(peaks: [PatternPoint], troughs: [PatternPoint]) -> ChartPattern? {
         guard peaks.count >= 2 && troughs.count >= 2 else { return nil }
-        
+        guard let peaksFirst = peaks.first,
+              let peaksLast = peaks.last,
+              let troughsFirst = troughs.first,
+              let troughsLast = troughs.last else { return nil }
+
         // Both trend lines should be rising
-        let peaksRising = peaks.last!.price > peaks.first!.price
-        let troughsRising = troughs.last!.price > troughs.first!.price
-        
+        let peaksRising = peaksLast.price > peaksFirst.price
+        let troughsRising = troughsLast.price > troughsFirst.price
+
         guard peaksRising && troughsRising else { return nil }
-        
+
         // Lines should be converging (getting closer)
-        let initialRange = peaks.first!.price - troughs.first!.price
-        let currentRange = peaks.last!.price - troughs.last!.price
-        
+        let initialRange = peaksFirst.price - troughsFirst.price
+        let currentRange = peaksLast.price - troughsLast.price
+
         guard currentRange < initialRange else { return nil }
-        
+
         return ChartPattern(
             type: .risingWedge,
             confidence: 0.6,
-            startDate: min(peaks.first!.timestamp, troughs.first!.timestamp),
-            endDate: max(peaks.last!.timestamp, troughs.last!.timestamp),
+            startDate: min(peaksFirst.timestamp, troughsFirst.timestamp),
+            endDate: max(peaksLast.timestamp, troughsLast.timestamp),
             keyPoints: peaks + troughs,
             description: "Rising Wedge pattern. Bearish reversal signal.",
-            target: troughs.first!.price,
-            stopLoss: peaks.last!.price
+            target: troughsFirst.price,
+            stopLoss: peaksLast.price
         )
     }
     
     private func detectFallingWedge(peaks: [PatternPoint], troughs: [PatternPoint]) -> ChartPattern? {
         guard peaks.count >= 2 && troughs.count >= 2 else { return nil }
-        
+        guard let peaksFirst = peaks.first,
+              let peaksLast = peaks.last,
+              let troughsFirst = troughs.first,
+              let troughsLast = troughs.last else { return nil }
+
         // Both trend lines should be falling
-        let peaksFalling = peaks.last!.price < peaks.first!.price
-        let troughsFalling = troughs.last!.price < troughs.first!.price
-        
+        let peaksFalling = peaksLast.price < peaksFirst.price
+        let troughsFalling = troughsLast.price < troughsFirst.price
+
         guard peaksFalling && troughsFalling else { return nil }
-        
+
         // Lines should be converging (getting closer)
-        let initialRange = peaks.first!.price - troughs.first!.price
-        let currentRange = peaks.last!.price - troughs.last!.price
-        
+        let initialRange = peaksFirst.price - troughsFirst.price
+        let currentRange = peaksLast.price - troughsLast.price
+
         guard currentRange < initialRange else { return nil }
-        
+
         return ChartPattern(
             type: .fallingWedge,
             confidence: 0.6,
-            startDate: min(peaks.first!.timestamp, troughs.first!.timestamp),
-            endDate: max(peaks.last!.timestamp, troughs.last!.timestamp),
+            startDate: min(peaksFirst.timestamp, troughsFirst.timestamp),
+            endDate: max(peaksLast.timestamp, troughsLast.timestamp),
             keyPoints: peaks + troughs,
             description: "Falling Wedge pattern. Bullish reversal signal.",
-            target: peaks.first!.price,
-            stopLoss: troughs.last!.price
+            target: peaksFirst.price,
+            stopLoss: troughsLast.price
         )
     }
     
     private func detectRectangles(data: [CandleData], pivots: [PatternPoint]) -> [ChartPattern] {
         var patterns: [ChartPattern] = []
-        
+
         let peaks = pivots.filter { $0.type == .peak }
         let troughs = pivots.filter { $0.type == .trough }
-        
+
         guard peaks.count >= 3 && troughs.count >= 3 else { return [] }
-        
+        guard let peaksFirst = peaks.first,
+              let peaksLast = peaks.last,
+              let troughsFirst = troughs.first,
+              let troughsLast = troughs.last else { return [] }
+
         // Check for horizontal resistance and support
         let peakPrices = peaks.map { $0.price }
         let troughPrices = troughs.map { $0.price }
-        
-        let peakVariation = (peakPrices.max()! - peakPrices.min()!) / peakPrices.min()!
-        let troughVariation = (troughPrices.max()! - troughPrices.min()!) / troughPrices.min()!
-        
+
+        guard let peakMax = peakPrices.max(),
+              let peakMin = peakPrices.min(),
+              let troughMax = troughPrices.max(),
+              let troughMin = troughPrices.min(),
+              peakMin > 0, troughMin > 0 else { return [] }
+
+        let peakVariation = (peakMax - peakMin) / peakMin
+        let troughVariation = (troughMax - troughMin) / troughMin
+
         // Both resistance and support should be relatively flat
         if peakVariation <= priceTolerancePercent && troughVariation <= priceTolerancePercent {
             let resistance = peakPrices.reduce(0, +) / Double(peakPrices.count)
             let support = troughPrices.reduce(0, +) / Double(troughPrices.count)
-            
+
             let pattern = ChartPattern(
                 type: .rectangle,
                 confidence: 0.65,
-                startDate: min(peaks.first!.timestamp, troughs.first!.timestamp),
-                endDate: max(peaks.last!.timestamp, troughs.last!.timestamp),
+                startDate: min(peaksFirst.timestamp, troughsFirst.timestamp),
+                endDate: max(peaksLast.timestamp, troughsLast.timestamp),
                 keyPoints: peaks + troughs,
                 description: "Rectangle consolidation pattern. Range-bound trading.",
                 target: resistance + (resistance - support), // Breakout target
                 stopLoss: support
             )
-            
+
             patterns.append(pattern)
         }
-        
+
         return patterns
     }
     
@@ -814,8 +847,12 @@ actor ChartPatternRecognizer {
         // Check neckline consistency
         if necklineTroughs.count >= 2 {
             let necklinePrices = necklineTroughs.map { $0.price }
-            let necklineVariation = (necklinePrices.max()! - necklinePrices.min()!) / necklinePrices.min()!
-            confidence += (priceTolerancePercent - necklineVariation) * 5
+            if let necklineMax = necklinePrices.max(),
+               let necklineMin = necklinePrices.min(),
+               necklineMin > 0 {
+                let necklineVariation = (necklineMax - necklineMin) / necklineMin
+                confidence += (priceTolerancePercent - necklineVariation) * 5
+            }
         }
         
         return min(confidence, 1.0)

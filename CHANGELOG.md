@@ -5,6 +5,23 @@ All notable changes to CryptoAnalysisMCP will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-05-07
+
+### Fixed (Breaking)
+- **Stochastic and MACD indicator timestamps off-by-one.** Both indicators were stamping each result with the timestamp of the candle one bar after the bar the value was computed from. Anyone joining indicator output to candle data by timestamp will see a one-bar shift. The new timestamps are correct.
+- **Paid-tier CoinPaprika auth path.** Switched to `api-pro.coinpaprika.com` base URL with `Authorization` header instead of `?apikey=` query parameter against the free host. Fixes silent failures on paid plans. Thanks to [@donbagger](https://github.com/donbagger) for the report and patch (#3).
+
+### Fixed
+- Divide-by-zero guard added to `findVolumeProfileLevels` and similar variation calculations — flat-market input no longer produces NaN propagating into trading signals.
+- Replaced ~43 force-unwraps in `ChartPatternRecognizer` and `SupportResistanceAnalyzer` with safe guarded unwraps; degenerate input now returns empty results instead of crashing.
+- Test target now compiles — added missing `await` on actor-isolated `calculateSMA` / `calculateRSI` calls.
+
+### Added
+- Golden-vector regression tests for SMA, EMA, RSI, MACD against a canonical 37-bar reference series (Swift Testing).
+- Timestamp regression tests verifying SMA, Stochastic, and MACD results carry the correct candle timestamp (catches the off-by-one fix from regressing).
+- URLProtocol-mocked auth-path tests verifying free-tier vs paid-tier CoinPaprika request construction (Swift Testing).
+- README disclaimer section + dedicated `DISCLAIMER.md` clarifying that this tool is for informational/educational use only, not financial advice.
+
 ## [1.1.0] - 2025-06-27
 
 ### Added

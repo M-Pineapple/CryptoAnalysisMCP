@@ -135,7 +135,7 @@ actor TechnicalAnalyzer {
                 name: "STOCH_\(kPeriod)_\(dPeriod)",
                 value: k,
                 signal: signal,
-                timestamp: data[i + kPeriod].timestamp,
+                timestamp: data[i + kPeriod - 1].timestamp,
                 parameters: ["kPeriod": kPeriod, "dPeriod": dPeriod, "percentK": k, "percentD": d]
             ))
         }
@@ -180,7 +180,7 @@ actor TechnicalAnalyzer {
                 name: "MACD_\(fastPeriod)_\(slowPeriod)_\(signalPeriod)",
                 value: macdLine[i],
                 signal: signal,
-                timestamp: data[i + slowPeriod].timestamp,
+                timestamp: data[i + slowPeriod - 1].timestamp,
                 parameters: [
                     "fastPeriod": fastPeriod,
                     "slowPeriod": slowPeriod,

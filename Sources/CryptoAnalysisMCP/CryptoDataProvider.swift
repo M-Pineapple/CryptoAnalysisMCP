@@ -2,9 +2,11 @@ import Foundation
 import Logging
 
 /// Provides cryptocurrency data from various sources
-actor CryptoDataProvider {
+actor CryptoDataProvider: DataProvider {
     private let logger = Logger(label: "CryptoDataProvider")
-    
+
+    var providerName: String { "CoinPaprika" }
+
     // DexPaprika provider for 7+ million tokens!
     let dexPaprikaProvider = DexPaprikaDataProvider()
     
@@ -95,21 +97,7 @@ actor CryptoDataProvider {
             coinId = firstResult.id
             logger.info("Using first search result: \(firstResult.name) (\(coinId))")
         } else {
-            // If CoinPaprika search fails, try DexPaprika
-            logger.info("No results on CoinPaprika for \(upperSymbol), trying DexPaprika...")
-            
-            do {
-                let dexResults = try await dexPaprikaProvider.searchToken(query: upperSymbol, limit: 5)
-                if let firstDexResult = dexResults.first {
-                    logger.info("Found on DexPaprika: \(firstDexResult.name) (\(firstDexResult.symbol))")
-                    // Return a special marker that indicates we should use DexPaprika
-                    throw CryptoAnalysisError.networkError("USE_DEXPAPRIKA")
-                }
-            } catch {
-                // Ignore DexPaprika errors here
-            }
-            
-            throw CryptoAnalysisError.invalidSymbol("\(upperSymbol) - Not found on CoinPaprika or any DEX")
+            throw CryptoAnalysisError.invalidSymbol("\(upperSymbol) - Not found on CoinPaprika")
         }
         
         // Cache the result
@@ -129,40 +117,38 @@ actor CryptoDataProvider {
             return cached.data
         }
         
-        // Try CoinPaprika first
-        do {
-            // Get CoinPaprika ID dynamically
-            let coinId = try await resolveCoinId(for: upperSymbol)
-        
+        // Get CoinPaprika ID dynamically
+        let coinId = try await resolveCoinId(for: upperSymbol)
+
         // Fetch from CoinPaprika ticker endpoint
         let urlString = "\(coinPaprikaBaseURL)/tickers/\(coinId)"
         guard let url = URL(string: urlString) else {
             throw CryptoAnalysisError.networkError("Invalid URL")
         }
-        
+
         logger.info("Fetching price data for \(upperSymbol) from CoinPaprika")
-        
+
         do {
             let (data, response) = try await URLSession.shared.data(for: authedRequest(url))
-            
+
             guard let httpResponse = response as? HTTPURLResponse else {
                 throw CryptoAnalysisError.networkError("Invalid response")
             }
-            
+
             // Check for payment required error
             if httpResponse.statusCode == 402 {
                 throw CryptoAnalysisError.networkError("This endpoint requires a paid CoinPaprika API subscription. Free tier includes 1 year of daily historical data - try using 'daily' timeframe.")
             }
-            
+
             guard (200...299).contains(httpResponse.statusCode) else {
                 throw CryptoAnalysisError.networkError("HTTP Error \(httpResponse.statusCode)")
             }
-            
+
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
-            
+
             let tickerResponse = try decoder.decode(CoinPaprikaTickerResponse.self, from: data)
-            
+
             let priceData = PriceData(
                 symbol: upperSymbol,
                 price: tickerResponse.quotes.USD.price,
@@ -183,33 +169,15 @@ actor CryptoDataProvider {
                 athPrice: tickerResponse.quotes.USD.athPrice,
                 athDate: tickerResponse.quotes.USD.athDate != nil ? ISO8601DateFormatter().date(from: tickerResponse.quotes.USD.athDate!) : nil
             )
-            
+
             // Cache the result
             priceCache[upperSymbol] = (priceData, Date())
-            
+
             return priceData
-            
+
         } catch {
             logger.error("Failed to fetch price data: \(error)")
             throw CryptoAnalysisError.networkError(error.localizedDescription)
-        }
-        } catch {
-            // If CoinPaprika fails, try DexPaprika
-            logger.info("CoinPaprika failed for \(upperSymbol), trying DexPaprika...")
-            
-            do {
-                let dexToken = try await dexPaprikaProvider.getTokenBySymbol(upperSymbol)
-                let priceData = await dexPaprikaProvider.convertToPriceData(token: dexToken)
-                
-                // Cache the result
-                priceCache[upperSymbol] = (priceData, Date())
-                
-                logger.info("Successfully retrieved \(upperSymbol) from DexPaprika!")
-                return priceData
-            } catch {
-                logger.error("Both CoinPaprika and DexPaprika failed for \(upperSymbol)")
-                throw CryptoAnalysisError.invalidSymbol("\(upperSymbol) - Not found on CoinPaprika or any DEX")
-            }
         }
     }
     

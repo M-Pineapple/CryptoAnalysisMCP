@@ -3,9 +3,25 @@ import Logging
 
 /// Provides cryptocurrency data from DexPaprika API - 7+ million tokens!
 /// NO API KEY REQUIRED - Completely free access
-actor DexPaprikaDataProvider {
+actor DexPaprikaDataProvider: DataProvider {
     internal let logger = Logger(label: "DexPaprikaDataProvider")
-    
+
+    var providerName: String { "DexPaprika" }
+
+    /// Protocol conformance: resolve symbol → token → PriceData in one hop.
+    func getCurrentPrice(symbol: String) async throws -> PriceData {
+        let token = try await getTokenBySymbol(symbol)
+        return convertToPriceData(token: token)
+    }
+
+    /// DexPaprika does not expose per-symbol historical OHLCV (only per-pool).
+    /// Surface this honestly rather than silently returning empty.
+    func getHistoricalData(symbol: String, timeframe: Timeframe, periods: Int) async throws -> [CandleData] {
+        throw CryptoAnalysisError.networkError(
+            "DexPaprika does not provide per-symbol historical OHLCV; use get_pool_ohlcv with a specific pool address."
+        )
+    }
+
     // DexPaprika API configuration
     internal let dexPaprikaBaseURL = "https://api.dexpaprika.com"
     

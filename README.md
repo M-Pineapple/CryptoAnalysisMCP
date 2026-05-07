@@ -2,9 +2,9 @@
   <img src="https://github.com/user-attachments/assets/5d1aae51-4183-4cd5-a79c-163fc1e8c918">
 </div>
 
-# CryptoAnalysisMCP v1.1 🚀
+# CryptoAnalysisMCP v1.3 🚀
 
-**NEW: Now supports 7+ MILLION tokens through DexPaprika integration!** 🎉
+**Supports 7+ MILLION tokens through DexPaprika integration!** 🎉
 
 A Model Context Protocol (MCP) server for comprehensive cryptocurrency technical analysis. Built with Swift, it provides real-time price data, technical indicators, chart pattern detection, and trading signals for over 7 million cryptocurrencies - from Bitcoin to the newest meme coin on any DEX!
 
@@ -23,36 +23,31 @@ CryptoAnalysisMCP is provided **for informational and educational purposes only*
 
 **By using CryptoAnalysisMCP you acknowledge and accept these terms.** See [DISCLAIMER.md](DISCLAIMER.md) for the full text.
 
-## 🆕 What's New in v1.1
+## 🆕 What's New in v1.3
 
-### 🌟 DexPaprika Integration - 7+ MILLION Tokens!
-- **NO API KEY REQUIRED** for basic price data on ANY token
-- Access to **every token on every DEX** across 23+ blockchains
-- Automatic fallback: CoinPaprika → DexPaprika
-- Analyze that meme coin that launched 5 minutes ago!
-- Perfect for:
-  - 🐸 Meme coin traders
-  - 🦄 DeFi degens
-  - 🚀 Early token hunters
-  - 📊 Anyone tracking obscure tokens
+### 🔄 Default SDK Transport
+- Moved from in-tree `SimpleMCP` to official `mcp-swift-sdk` v0.12.1 as the default transport
+- Legacy `SimpleMCP` available via `--use-legacy` flag (one-release safety valve; removed in v1.4)
+- Both transports expose the same 16 tools with identical schemas
+
+### ⚙️ Swift 6.1 Toolchain
+- Full strict concurrency compliance with zero warnings
+- Modern async/await patterns throughout
+- Enhanced type safety and memory management
+
+### 📦 v1.2 Quality Bundle
+- `DataProvider` protocol for pluggable data sources (CoinPaprika primary, DexPaprika fallback)
+- Fixed mathematical precision in all technical indicators (RSI, MACD, OBV, Williams %R, Bollinger Bands)
+- 2,989+ integration and golden-vector tests ensure indicator accuracy
 
 🐦 **Follow [@m_pineapple__](https://x.com/m_pineapple__) for updates!**
-
-### 🔧 New Liquidity & DEX Tools
-- **get_token_liquidity**: Track liquidity across all DEXes for any token
-- **search_tokens_by_network**: Find tokens on specific blockchains
-- **compare_dex_prices**: Compare token prices across different DEXes
-- **get_network_pools**: View top liquidity pools on any network
-- **get_dex_info**: Get information about DEXes on a network
-- **get_available_networks**: List all 23+ supported blockchains
-- **search_tokens_advanced**: Advanced search with liquidity/volume filters
 
 ## Features
 
 > 💡 **Not sure what to ask?** Check our [**Crypto Analysis Prompts Guide**](./PROMPTS.md) for inspiration!
 
-- **🆕 Universal Token Support**: 7+ MILLION tokens through DexPaprika integration
-- **🆕 Liquidity Pool Analytics**: Monitor liquidity, volume, and pool data across DEXes
+- **Universal Token Support**: 7+ MILLION tokens through DexPaprika integration
+- **Liquidity Pool Analytics**: Monitor liquidity, volume, and pool data across DEXes
 - **Dynamic Symbol Resolution**: Automatically supports all cryptocurrencies
 - **Real-time Price Data**: Current prices, volume, market cap, and percentage changes
 - **Technical Indicators**: RSI, MACD, Moving Averages, Bollinger Bands, and more
@@ -60,16 +55,12 @@ CryptoAnalysisMCP is provided **for informational and educational purposes only*
 - **Support & Resistance Levels**: Automatic identification of key price levels  
 - **Trading Signals**: Buy/sell/hold recommendations based on technical analysis
 - **Multi-timeframe Analysis**: 4-hour, daily, weekly, and monthly timeframes
-- **Risk-adjusted Strategies**: Conservative, moderate, and aggressive trading approaches
+- **Risk-adjusted Signal Filtering**: Conservative, moderate, and aggressive thresholds for signal confidence
 
-## 🚀 Coming Soon
+## 🗺️ Roadmap
 
-We're actively working on exciting new features to make CryptoAnalysisMCP even more powerful:
-
-### 🆕 Next Release (v1.2.0)
-![image](https://github.com/user-attachments/assets/7f018851-c15a-464f-9391-be6fa24de61b)
-
-
+### v1.4 (Planned)
+- Remove legacy `SimpleMCP` transport (SDK becomes mandatory)
 
 Want to suggest a feature? [Open an issue](https://github.com/M-Pineapple/CryptoAnalysisMCP/issues) on GitHub!
 
@@ -88,9 +79,9 @@ Want to suggest a feature? [Open an issue](https://github.com/M-Pineapple/Crypto
 - ✅ Long-term investment analysis
 - ✅ All technical indicators on DAILY timeframe
 - ✅ 1 year of daily historical data
-- 🆕 Basic price data for 7+ MILLION tokens via DexPaprika
-- 🆕 Liquidity pool data across all major DEXes
-- 🆕 DEX price comparison and aggregation
+- Basic price data for 7+ MILLION tokens via DexPaprika
+- Liquidity pool data across all major DEXes
+- DEX price comparison and aggregation
 
 **What REQUIRES a Pro API key ($99/mo):**
 - ❌ Day trading (you need hourly/4h data)
@@ -132,28 +123,19 @@ The free tier includes:
 
 ### Can I use CoinMarketCap or CoinGecko API instead?
 
-**Currently**: Not directly - this MCP is specifically built for CoinPaprika's API structure.
+**Currently**: Not implemented. CryptoAnalysisMCP uses CoinPaprika as the primary data provider.
 
-**Coming in v1.2.0**: CoinMarketCap API support! 🎉
+**How to add support**: As of v1.2.0, the `DataProvider` protocol makes it straightforward to add alternative data sources. If you're interested in CoinMarketCap or CoinGecko integration, contributions are welcome! Open an issue to discuss or submit a PR.
 
-Key differences:
-- **CoinMarketCap**: Different endpoint structure (support coming in v1.2.0!)
-- **CoinGecko**: Different data format (planned for future release)
-- **CoinPaprika**: Best coverage (71,000+ assets vs 10,000-20,000 for competitors)
-
-We chose CoinPaprika first because:
-- 3x more market coverage than competitors
-- More generous free tier
+Why CoinPaprika first:
+- 3x more market coverage than competitors (71,000+ assets)
+- More generous free tier (25,000 API calls/month)
 - Better historical data access
 - Superior API reliability (99.9% uptime)
 
-Once v1.2.0 is released, you'll be able to switch between CoinPaprika and CoinMarketCap APIs with a simple configuration change!
-
 ### What cryptocurrencies are supported?
 
-**🆕 v1.1: Now supports 7+ MILLION tokens!**
-
-With our new DexPaprika integration:
+The MCP supports **7+ MILLION tokens** via DexPaprika integration:
 - ✅ **All 2,500+ CoinPaprika tokens** (major coins with full analysis)
 - ✅ **7+ MILLION DEX tokens** via DexPaprika (automatic fallback)
 - ✅ **Every token on every DEX** across 23+ blockchains
@@ -258,7 +240,7 @@ Plus, we love Swift! 🍍
    - Visit [CoinPaprika API](https://coinpaprika.com/api/)
    - Click "Start Free" and register
    - Copy your API key for step 3
-   - 🆕 Note: Basic price data now works without API key via DexPaprika!
+   - Note: Basic price data works without API key via DexPaprika!
 
 ### Quick Install
 
@@ -373,7 +355,7 @@ crypto-analysis:multi_timeframe_analysis
   symbol: "AVAX"
 ```
 
-### 🆕 NEW v1.1 Commands
+### Liquidity & DEX Commands
 
 ### Get Token Liquidity
 ```
@@ -456,7 +438,7 @@ Here are some natural language prompts you can use:
 "Are there any chart patterns forming on [SYMBOL]?"
 ```
 
-**7. 🆕 Meme Coin & DEX Token Analysis**
+**7. Meme Coin & DEX Token Analysis**
 ```
 "What's the price of WOJAK?"
 "Analyze that new PEPE fork on Ethereum"
@@ -464,7 +446,7 @@ Here are some natural language prompts you can use:
 "Track this Uniswap token: [contract address]"
 ```
 
-**8. 🆕 Liquidity & DEX Analytics**
+**8. Liquidity & DEX Analytics**
 ```
 "What's the liquidity for SHIB across all DEXes?"
 "Show me the top pools on Solana"
@@ -480,7 +462,7 @@ Here are some natural language prompts you can use:
 
 ## Supported Cryptocurrencies
 
-**🆕 v1.1 Update**: The MCP now supports **7+ MILLION tokens** through our dual-provider system:
+The MCP supports **7+ MILLION tokens** through our dual-provider system:
 
 1. **CoinPaprika** (Primary): 2,500+ major cryptocurrencies with full technical analysis
 2. **DexPaprika** (Fallback): 7+ million DEX tokens across 23+ blockchains - NO API KEY REQUIRED!
@@ -503,7 +485,7 @@ Just use any ticker symbol - if it exists on any DEX, we'll find it!
 ### API Key (Optional but Recommended)
 
 ⚠️ **Important**: 
-- 🆕 Basic price data now works WITHOUT API key via DexPaprika!
+- Basic price data works WITHOUT API key via DexPaprika
 - Technical analysis features still require a FREE CoinPaprika API key
 
 #### Get your FREE API key:

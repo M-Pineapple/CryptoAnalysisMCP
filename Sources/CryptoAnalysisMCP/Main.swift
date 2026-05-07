@@ -19,6 +19,9 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
     @Flag(help: "Use the official mcp-swift-sdk transport instead of the built-in SimpleMCP (experimental, opt-in for v1.2.1)")
     var useSDK: Bool = false
 
+    @Flag(help: "Use the legacy in-tree SimpleMCP transport instead of the official mcp-swift-sdk (one-release safety valve; SimpleMCP is removed in v1.4)")
+    var useLegacy: Bool = false
+
     func run() async throws {
         // Set up logging - only if debug flag is set
         if debug {
@@ -43,6 +46,22 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
         // Validate transport up front so `--use-sdk http` (etc.) fails fast.
         guard transport == "stdio" else {
             throw ValidationError("Unsupported transport: \(transport)")
+        }
+
+        if useLegacy {
+            // Explicit opt-out to legacy SimpleMCP. Same destination as the
+            // current default fallthrough, but reachable via a stable flag
+            // so v1.3 can flip the default to SDK without stranding users.
+            let server = MCPServer(
+                name: "crypto-analysis",
+                version: "1.3.0",
+                debugMode: debug
+            )
+            await registerTools(server: server, handler: analysisHandler)
+            await registerDexPaprikaTools(server: server, handler: analysisHandler)
+            logger.info("✅ Registered crypto analysis tools (legacy SimpleMCP, --use-legacy)")
+            await server.runStdio()
+            return
         }
 
         if useSDK {

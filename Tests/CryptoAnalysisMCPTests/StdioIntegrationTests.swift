@@ -348,4 +348,46 @@ struct StdioIntegrationTests {
         // explicitly as false on success. Don't assert; the network may
         // be unreachable in CI and the handler still returns content.
     }
+
+    // MARK: - Test 4: schema parity
+
+    @Test("Both transports expose byte-equivalent inputSchema for every tool")
+    func schemaParityAcrossTransports() async throws {
+        func inputSchemas(args: [String]) async throws -> [String: Data] {
+            let responses = try await runMCP(
+                args: args,
+                requests: [JSONRPCRequest.initialize, JSONRPCRequest.toolsList]
+            )
+            let listResp = try #require(response(id: 2, in: responses))
+            let result = try #require(listResp["result"] as? [String: Any])
+            let tools = try #require(result["tools"] as? [[String: Any]])
+            var byName: [String: Data] = [:]
+            for tool in tools {
+                let name = try #require(tool["name"] as? String)
+                let schema = try #require(tool["inputSchema"], "tool \(name) missing inputSchema")
+                byName[name] = try canonicalize(schema)
+            }
+            return byName
+        }
+        let legacy = try await inputSchemas(args: ["--use-legacy"])
+        let sdk    = try await inputSchemas(args: [])  // default
+        #expect(Set(legacy.keys) == Set(sdk.keys), "Tool name set differs between transports")
+        for name in legacy.keys.sorted() {
+            #expect(
+                legacy[name] == sdk[name],
+                "inputSchema drift for tool \(name)\n  legacy: \(String(data: legacy[name]!, encoding: .utf8) ?? "")\n  sdk:    \(String(data: sdk[name]!, encoding: .utf8) ?? "")"
+            )
+        }
+    }
+}
+
+/// Canonicalize an arbitrary JSON-compatible value into a deterministic byte
+/// representation so two semantically equal JSON values compare equal at the
+/// `Data` level. Sorted keys + no slash escaping; null literals are preserved
+/// so any `description: null` vs missing-key asymmetry surfaces explicitly.
+private func canonicalize(_ value: Any) throws -> Data {
+    try JSONSerialization.data(
+        withJSONObject: value,
+        options: [.sortedKeys, .withoutEscapingSlashes]
+    )
 }

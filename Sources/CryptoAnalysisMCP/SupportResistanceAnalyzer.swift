@@ -53,31 +53,33 @@ actor SupportResistanceAnalyzer {
     
     private func findPivotBasedLevels(data: [CandleData]) -> [SupportResistanceLevel] {
         var levels: [SupportResistanceLevel] = []
-        
+
+        guard let lastCandle = data.last else { return [] }
+
         // Find local highs and lows
         var localHighs: [(price: Double, timestamp: Date, touches: Int)] = []
         var localLows: [(price: Double, timestamp: Date, touches: Int)] = []
-        
+
         for i in 1..<(data.count - 1) {
             let prev = data[i - 1]
             let current = data[i]
             let next = data[i + 1]
-            
+
             // Local high
             if current.high > prev.high && current.high > next.high {
                 localHighs.append((price: current.high, timestamp: current.timestamp, touches: 1))
             }
-            
+
             // Local low
             if current.low < prev.low && current.low < next.low {
                 localLows.append((price: current.low, timestamp: current.timestamp, touches: 1))
             }
         }
-        
+
         // Group similar price levels and count touches
         let groupedHighs = groupSimilarPriceLevels(localHighs)
         let groupedLows = groupSimilarPriceLevels(localLows)
-        
+
         // Create resistance levels from highs
         for high in groupedHighs where high.touches >= minTouches {
             let level = SupportResistanceLevel(
@@ -86,11 +88,11 @@ actor SupportResistanceAnalyzer {
                 type: .resistance,
                 touches: high.touches,
                 lastTouch: high.timestamp,
-                isActive: isLevelActive(price: high.price, currentPrice: data.last!.close)
+                isActive: isLevelActive(price: high.price, currentPrice: lastCandle.close)
             )
             levels.append(level)
         }
-        
+
         // Create support levels from lows
         for low in groupedLows where low.touches >= minTouches {
             let level = SupportResistanceLevel(
@@ -99,11 +101,11 @@ actor SupportResistanceAnalyzer {
                 type: .support,
                 touches: low.touches,
                 lastTouch: low.timestamp,
-                isActive: isLevelActive(price: low.price, currentPrice: data.last!.close)
+                isActive: isLevelActive(price: low.price, currentPrice: lastCandle.close)
             )
             levels.append(level)
         }
-        
+
         return levels
     }
     
@@ -111,34 +113,40 @@ actor SupportResistanceAnalyzer {
     
     private func findVolumeProfileLevels(data: [CandleData]) -> [SupportResistanceLevel] {
         var levels: [SupportResistanceLevel] = []
-        
-        // Create price buckets
-        let priceRange = data.map { $0.high }.max()! - data.map { $0.low }.min()!
+
+        guard let lastCandle = data.last,
+              let maxHigh = data.map({ $0.high }).max(),
+              let minLow = data.map({ $0.low }).min() else { return [] }
+        let priceRange = maxHigh - minLow
+        guard priceRange > 0 else {
+            logger.info("Flat market — skipping volume profile")
+            return []
+        }
         let bucketSize = priceRange / 50 // 50 price buckets
-        let minPrice = data.map { $0.low }.min()!
-        
+        let minPrice = minLow
+
         var volumeProfile: [Int: Double] = [:]
-        
+
         // Accumulate volume in price buckets
         for candle in data {
             let avgPrice = (candle.high + candle.low + candle.close) / 3
             let bucketIndex = Int((avgPrice - minPrice) / bucketSize)
             volumeProfile[bucketIndex, default: 0] += candle.volume
         }
-        
+
         // Find high volume nodes (potential support/resistance)
         let sortedBuckets = volumeProfile.sorted { $0.value > $1.value }
         let topBuckets = Array(sortedBuckets.prefix(10)) // Top 10 volume nodes
-        
+
         for (bucketIndex, volume) in topBuckets {
             let price = minPrice + (Double(bucketIndex) + 0.5) * bucketSize
-            let currentPrice = data.last!.close
-            
+            let currentPrice = lastCandle.close
+
             let levelType: LevelType = price < currentPrice ? .support : .resistance
-            
+
             // Count how many times price touched this level
             let touches = countPriceTouches(price: price, data: data)
-            
+
             if touches >= minTouches {
                 let level = SupportResistanceLevel(
                     price: price,
@@ -151,7 +159,7 @@ actor SupportResistanceAnalyzer {
                 levels.append(level)
             }
         }
-        
+
         return levels
     }
     
@@ -159,25 +167,25 @@ actor SupportResistanceAnalyzer {
     
     private func findFibonacciLevels(data: [CandleData]) -> [SupportResistanceLevel] {
         var levels: [SupportResistanceLevel] = []
-        
-        // Find swing high and low
-        let high = data.map { $0.high }.max()!
-        let low = data.map { $0.low }.min()!
+
+        guard let lastCandle = data.last,
+              let high = data.map({ $0.high }).max(),
+              let low = data.map({ $0.low }).min() else { return [] }
         let range = high - low
-        
+
         // Fibonacci ratios
         let fibRatios = [0.0, 0.236, 0.382, 0.5, 0.618, 0.786, 1.0]
-        
+
         for ratio in fibRatios {
             let price = low + (range * ratio)
-            let currentPrice = data.last!.close
-            
+            let currentPrice = lastCandle.close
+
             // Count actual touches at this level
             let touches = countPriceTouches(price: price, data: data)
-            
+
             if touches >= 1 { // Lower threshold for Fibonacci levels
                 let levelType: LevelType = price < currentPrice ? .support : .resistance
-                
+
                 let level = SupportResistanceLevel(
                     price: price,
                     strength: 0.5 + (Double(touches) * 0.1), // Base strength + touch bonus
@@ -189,7 +197,7 @@ actor SupportResistanceAnalyzer {
                 levels.append(level)
             }
         }
-        
+
         return levels
     }
     
@@ -197,9 +205,13 @@ actor SupportResistanceAnalyzer {
     
     private func findPsychologicalLevels(data: [CandleData]) -> [SupportResistanceLevel] {
         var levels: [SupportResistanceLevel] = []
-        
-        let currentPrice = data.last!.close
-        
+
+        guard let lastCandle = data.last,
+              let minPrice = data.map({ $0.low }).min(),
+              let maxPrice = data.map({ $0.high }).max() else { return [] }
+
+        let currentPrice = lastCandle.close
+
         // Determine appropriate round number interval based on price
         let interval: Double
         if currentPrice < 1 {
@@ -215,11 +227,7 @@ actor SupportResistanceAnalyzer {
         } else {
             interval = 10000
         }
-        
-        // Find round numbers within the data range
-        let minPrice = data.map { $0.low }.min()!
-        let maxPrice = data.map { $0.high }.max()!
-        
+
         var price = floor(minPrice / interval) * interval
         
         while price <= maxPrice {
@@ -380,10 +388,10 @@ actor SupportResistanceAnalyzer {
             
             // Merge grouped levels
             let avgPrice = groupedLevels.map { $0.price }.reduce(0, +) / Double(groupedLevels.count)
-            let maxStrength = groupedLevels.map { $0.strength }.max()!
+            let maxStrength = groupedLevels.map { $0.strength }.max() ?? 0.0
             let totalTouches = groupedLevels.map { $0.touches }.reduce(0, +)
-            let latestTouch = groupedLevels.map { $0.lastTouch }.max()!
-            let levelType = groupedLevels.first!.type
+            let latestTouch = groupedLevels.map { $0.lastTouch }.max() ?? Date()
+            let levelType = groupedLevels.first?.type ?? .support
             
             let consolidatedLevel = SupportResistanceLevel(
                 price: avgPrice,

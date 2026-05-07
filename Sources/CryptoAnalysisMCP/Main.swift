@@ -7,15 +7,18 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "crypto-analysis-mcp",
         abstract: "A Model Context Protocol server for cryptocurrency technical analysis",
-        version: "1.2.0"
+        version: "1.2.1"
     )
     
     @Option(help: "Transport method")
     var transport: String = "stdio"
-    
+
     @Flag(help: "Enable debug logging to stderr")
     var debug = false
-    
+
+    @Flag(help: "Use the official mcp-swift-sdk transport instead of the built-in SimpleMCP (experimental, opt-in for v1.2.1)")
+    var useSDK: Bool = false
+
     func run() async throws {
         // Set up logging - only if debug flag is set
         if debug {
@@ -32,38 +35,40 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
         }
         
         let logger = Logger(label: "CryptoAnalysisMCP")
-        logger.info("🚀 Starting Crypto Analysis MCP Server v1.2.0")
-        
+        logger.info("🚀 Starting Crypto Analysis MCP Server v1.2.1")
+
         // Create the analysis handler
         let analysisHandler = CryptoAnalysisHandler()
-        
-        // Create the MCP server
-        let server = MCPServer(
-            name: "crypto-analysis",
-            version: "1.2.0",
-            debugMode: debug
-        )
-        
-        // Register all analysis tools
-        await registerTools(server: server, handler: analysisHandler)
-        
-        // Register v1.1 DexPaprika tools
-        await registerDexPaprikaTools(server: server, handler: analysisHandler)
-        
-        logger.info("✅ Registered crypto analysis tools (v1.2 with quality bundle + DataProvider protocol)")
-        
-        // Start the server based on transport
-        switch transport {
-        case "stdio":
-            await server.runStdio()
-        default:
+
+        // Validate transport up front so `--use-sdk http` (etc.) fails fast.
+        guard transport == "stdio" else {
             throw ValidationError("Unsupported transport: \(transport)")
+        }
+
+        if useSDK {
+            // SDK path: official mcp-swift-sdk
+            let bridge = MCPSDKBridge(name: "crypto-analysis", version: "1.2.1")
+            await registerTools(server: bridge, handler: analysisHandler)
+            await registerDexPaprikaTools(server: bridge, handler: analysisHandler)
+            logger.info("✅ Registered crypto analysis tools via mcp-swift-sdk (--use-sdk)")
+            try await bridge.runStdio()
+        } else {
+            // Legacy path: in-tree SimpleMCP
+            let server = MCPServer(
+                name: "crypto-analysis",
+                version: "1.2.1",
+                debugMode: debug
+            )
+            await registerTools(server: server, handler: analysisHandler)
+            await registerDexPaprikaTools(server: server, handler: analysisHandler)
+            logger.info("✅ Registered crypto analysis tools (legacy SimpleMCP)")
+            await server.runStdio()
         }
     }
     
-    private func registerTools(server: MCPServer, handler: CryptoAnalysisHandler) async {
+    private func registerTools(server: any ToolRegistrar, handler: CryptoAnalysisHandler) async {
         // Price tool
-        server.addTool(MCPTool(
+        await server.register(MCPTool(
             name: "get_crypto_price",
             description: "Get current price and market data for a cryptocurrency",
             inputSchema: createToolSchema(
@@ -80,7 +85,7 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
         })
         
         // Technical indicators tool
-        server.addTool(MCPTool(
+        await server.register(MCPTool(
             name: "get_technical_indicators",
             description: "Calculate technical indicators (RSI, MACD, SMA, EMA, Bollinger Bands)",
             inputSchema: createToolSchema(
@@ -106,7 +111,7 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
         })
         
         // Chart patterns tool
-        server.addTool(MCPTool(
+        await server.register(MCPTool(
             name: "detect_chart_patterns",
             description: "Detect chart patterns like head & shoulders, triangles, double tops/bottoms",
             inputSchema: createToolSchema(
@@ -127,7 +132,7 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
         })
         
         // Multi-timeframe analysis tool
-        server.addTool(MCPTool(
+        await server.register(MCPTool(
             name: "multi_timeframe_analysis",
             description: "Analyze trends and signals across multiple timeframes",
             inputSchema: createToolSchema(
@@ -144,7 +149,7 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
         })
         
         // Trading signals tool
-        server.addTool(MCPTool(
+        await server.register(MCPTool(
             name: "get_trading_signals",
             description: "Generate buy/sell/hold signals based on technical analysis",
             inputSchema: createToolSchema(
@@ -169,7 +174,7 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
         })
         
         // Support/Resistance tool
-        server.addTool(MCPTool(
+        await server.register(MCPTool(
             name: "get_support_resistance",
             description: "Find key support and resistance levels",
             inputSchema: createToolSchema(
@@ -190,7 +195,7 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
         })
         
         // Full analysis tool
-        server.addTool(MCPTool(
+        await server.register(MCPTool(
             name: "get_full_analysis",
             description: "Get comprehensive technical analysis including all indicators, patterns, and signals",
             inputSchema: createToolSchema(

@@ -211,7 +211,10 @@ struct MCPError: Codable, Error, Sendable {
     }
 }
 
-/// Tool definition for MCP
+/// Tool definition for MCP. Used by both the in-tree `MCPServer` and the
+/// SDK-bridge path; not Sendable because `inputSchema` is `[String: Any]`.
+/// All call sites construct and consume `MCPTool` within the same isolation
+/// domain (executable startup), so no cross-actor send is needed.
 struct MCPTool {
     let name: String
     let description: String

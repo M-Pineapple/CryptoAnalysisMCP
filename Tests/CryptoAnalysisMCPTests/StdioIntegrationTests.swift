@@ -248,7 +248,7 @@ struct StdioIntegrationTests {
     @Test("Legacy SimpleMCP transport lists all 16 tools")
     func legacyTransportListsAllSixteenTools() async throws {
         let responses = try await runMCP(
-            args: ["--transport", "stdio"],
+            args: ["--use-legacy"],
             requests: [JSONRPCRequest.initialize, JSONRPCRequest.toolsList]
         )
 
@@ -261,7 +261,7 @@ struct StdioIntegrationTests {
         #expect(initResult["protocolVersion"] as? String == "2024-11-05")
         let serverInfo = try #require(initResult["serverInfo"] as? [String: Any], "missing serverInfo")
         #expect(serverInfo["name"] as? String == "crypto-analysis")
-        #expect(serverInfo["version"] as? String == "1.2.1")
+        #expect(serverInfo["version"] as? String == "1.3.0")
 
         // tools/list response
         let listResp = try #require(response(id: 2, in: responses), "No tools/list response")
@@ -275,10 +275,10 @@ struct StdioIntegrationTests {
 
     // MARK: - Test 2: SDK transport
 
-    @Test("SDK transport (--use-sdk) lists all 16 tools")
+    @Test("SDK transport (default) lists all 16 tools")
     func sdkTransportListsAllSixteenTools() async throws {
         let responses = try await runMCP(
-            args: ["--use-sdk"],
+            args: [],
             requests: [JSONRPCRequest.initialize, JSONRPCRequest.toolsList]
         )
 
@@ -289,7 +289,7 @@ struct StdioIntegrationTests {
         #expect(initResult["protocolVersion"] as? String == "2024-11-05")
         let serverInfo = try #require(initResult["serverInfo"] as? [String: Any], "missing serverInfo")
         #expect(serverInfo["name"] as? String == "crypto-analysis")
-        #expect(serverInfo["version"] as? String == "1.2.1")
+        #expect(serverInfo["version"] as? String == "1.3.0")
 
         let listResp = try #require(response(id: 2, in: responses), "No tools/list response")
         let names = toolNames(from: listResp)
@@ -309,7 +309,7 @@ struct StdioIntegrationTests {
         // We assert on the *shape* of the response, not the body,
         // because the body depends on whether the network is reachable.
         let responses = try await runMCP(
-            args: ["--use-sdk"],
+            args: [],
             requests: [
                 JSONRPCRequest.initialize,
                 JSONRPCRequest.getAvailableNetworks
@@ -348,4 +348,46 @@ struct StdioIntegrationTests {
         // explicitly as false on success. Don't assert; the network may
         // be unreachable in CI and the handler still returns content.
     }
+
+    // MARK: - Test 4: schema parity
+
+    @Test("Both transports expose byte-equivalent inputSchema for every tool")
+    func schemaParityAcrossTransports() async throws {
+        func inputSchemas(args: [String]) async throws -> [String: Data] {
+            let responses = try await runMCP(
+                args: args,
+                requests: [JSONRPCRequest.initialize, JSONRPCRequest.toolsList]
+            )
+            let listResp = try #require(response(id: 2, in: responses))
+            let result = try #require(listResp["result"] as? [String: Any])
+            let tools = try #require(result["tools"] as? [[String: Any]])
+            var byName: [String: Data] = [:]
+            for tool in tools {
+                let name = try #require(tool["name"] as? String)
+                let schema = try #require(tool["inputSchema"], "tool \(name) missing inputSchema")
+                byName[name] = try canonicalize(schema)
+            }
+            return byName
+        }
+        let legacy = try await inputSchemas(args: ["--use-legacy"])
+        let sdk    = try await inputSchemas(args: [])  // default
+        #expect(Set(legacy.keys) == Set(sdk.keys), "Tool name set differs between transports")
+        for name in legacy.keys.sorted() {
+            #expect(
+                legacy[name] == sdk[name],
+                "inputSchema drift for tool \(name)\n  legacy: \(String(data: legacy[name]!, encoding: .utf8) ?? "")\n  sdk:    \(String(data: sdk[name]!, encoding: .utf8) ?? "")"
+            )
+        }
+    }
+}
+
+/// Canonicalize an arbitrary JSON-compatible value into a deterministic byte
+/// representation so two semantically equal JSON values compare equal at the
+/// `Data` level. Sorted keys + no slash escaping; null literals are preserved
+/// so any `description: null` vs missing-key asymmetry surfaces explicitly.
+private func canonicalize(_ value: Any) throws -> Data {
+    try JSONSerialization.data(
+        withJSONObject: value,
+        options: [.sortedKeys, .withoutEscapingSlashes]
+    )
 }

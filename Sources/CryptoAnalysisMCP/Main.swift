@@ -7,7 +7,7 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "crypto-analysis-mcp",
         abstract: "A Model Context Protocol server for cryptocurrency technical analysis",
-        version: "1.2.1"
+        version: "1.3.0"
     )
     
     @Option(help: "Transport method")
@@ -16,8 +16,11 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
     @Flag(help: "Enable debug logging to stderr")
     var debug = false
 
-    @Flag(help: "Use the official mcp-swift-sdk transport instead of the built-in SimpleMCP (experimental, opt-in for v1.2.1)")
+    @Flag(help: ArgumentHelp("(Deprecated) No-op as of v1.3 — SDK transport is now the default. Use --use-legacy to opt out.", visibility: .hidden))
     var useSDK: Bool = false
+
+    @Flag(help: "Use the legacy in-tree SimpleMCP transport instead of the official mcp-swift-sdk (one-release safety valve; SimpleMCP is removed in v1.4)")
+    var useLegacy: Bool = false
 
     func run() async throws {
         // Set up logging - only if debug flag is set
@@ -35,34 +38,44 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
         }
         
         let logger = Logger(label: "CryptoAnalysisMCP")
-        logger.info("🚀 Starting Crypto Analysis MCP Server v1.2.1")
+        logger.info("🚀 Starting Crypto Analysis MCP Server v1.3.0")
+
+        // --use-sdk is now a no-op (SDK is the default). Keep accepting it
+        // for v1.2.x backward compatibility but warn so configs get cleaned
+        // up before v1.4 removes the flag entirely.
+        if useSDK {
+            FileHandle.standardError.write(Data(
+                "warning: --use-sdk is deprecated as of v1.3.0 (SDK transport is now default). The flag is a no-op and will be removed in v1.4. Remove it from your config to silence this warning.\n".utf8
+            ))
+        }
 
         // Create the analysis handler
         let analysisHandler = CryptoAnalysisHandler()
 
-        // Validate transport up front so `--use-sdk http` (etc.) fails fast.
+        // Validate transport up front so `--use-legacy http` (etc.) fails fast.
         guard transport == "stdio" else {
             throw ValidationError("Unsupported transport: \(transport)")
         }
 
-        if useSDK {
-            // SDK path: official mcp-swift-sdk
-            let bridge = MCPSDKBridge(name: "crypto-analysis", version: "1.2.1")
-            await registerTools(server: bridge, handler: analysisHandler)
-            await registerDexPaprikaTools(server: bridge, handler: analysisHandler)
-            logger.info("✅ Registered crypto analysis tools via mcp-swift-sdk (--use-sdk)")
-            try await bridge.runStdio()
-        } else {
-            // Legacy path: in-tree SimpleMCP
+        if useLegacy {
+            // Explicit opt-out to legacy SimpleMCP. Retained as a one-release
+            // safety valve; SimpleMCP itself is removed in v1.4.
             let server = MCPServer(
                 name: "crypto-analysis",
-                version: "1.2.1",
+                version: "1.3.0",
                 debugMode: debug
             )
             await registerTools(server: server, handler: analysisHandler)
             await registerDexPaprikaTools(server: server, handler: analysisHandler)
-            logger.info("✅ Registered crypto analysis tools (legacy SimpleMCP)")
+            logger.info("✅ Registered crypto analysis tools (legacy SimpleMCP, --use-legacy)")
             await server.runStdio()
+        } else {
+            // Default path: official mcp-swift-sdk.
+            let bridge = MCPSDKBridge(name: "crypto-analysis", version: "1.3.0")
+            await registerTools(server: bridge, handler: analysisHandler)
+            await registerDexPaprikaTools(server: bridge, handler: analysisHandler)
+            logger.info("✅ Registered crypto analysis tools via mcp-swift-sdk (default)")
+            try await bridge.runStdio()
         }
     }
     

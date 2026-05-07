@@ -5,6 +5,22 @@ All notable changes to CryptoAnalysisMCP will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-05-07
+
+### Changed (Default behavior)
+- **Default transport is now the official `mcp-swift-sdk` (v0.12.1).** v1.2.1 made it opt-in via `--use-sdk`; v1.3 promotes it to the default.
+- **Wire-format note:** the SDK serializes JSON with sorted keys and emits `"description": null` for tools without a description (the legacy path omitted the key). Both behaviors are semantically valid JSON-RPC 2.0; downstream consumers diffing raw JSON-RPC traffic should expect this shape change.
+
+### Added
+- **`--use-legacy` flag** opting back into the in-tree `SimpleMCP` transport. One-release safety valve so users with SDK-specific issues have a workaround. SimpleMCP is removed in v1.4.
+- **Schema-parity integration test.** `StdioIntegrationTests.schemaParityAcrossTransports` spawns the binary against both transports, parses `tools/list`, and asserts byte-equivalent canonicalized `inputSchema` for every tool. Catches drift from forgetting to wire a new tool through one path.
+
+### Deprecated
+- **`--use-sdk` flag is a no-op as of v1.3.** Accepted for backward compatibility with v1.2.x configs; emits a one-time stderr deprecation warning. Removed in v1.4.
+
+### Deferred to v1.4
+- **`SimpleMCP` removal.** Retained for one release of real-world v1.3 SDK-default usage as a safety margin.
+
 ## [1.2.1] - 2026-05-07
 
 ### Added

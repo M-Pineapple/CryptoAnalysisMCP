@@ -13,6 +13,9 @@
 
 import Testing
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 @testable import CryptoAnalysisMCP
 
 // MARK: - URLProtocol stub

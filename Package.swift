@@ -15,9 +15,11 @@ let package = Package(
         .package(url: "https://github.com/modelcontextprotocol/swift-sdk.git", from: "0.12.1")
     ],
     targets: [
+        .target(name: "StdioShims"),
         .executableTarget(
             name: "CryptoAnalysisMCP",
             dependencies: [
+                "StdioShims",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "Logging", package: "swift-log"),
                 .product(name: "MCP", package: "swift-sdk")

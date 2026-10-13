@@ -94,7 +94,10 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
                 required: ["symbol"]
             )
         ) { arguments in
-            await handler.getCurrentPrice(arguments: arguments)
+            // [String: Any] is not Sendable. The handler builds a fresh
+            // dictionary and does not keep it, so the transfer is safe.
+            nonisolated(unsafe) let result = await handler.getCurrentPrice(arguments: arguments)
+            return result
         })
         
         // Technical indicators tool
@@ -120,7 +123,8 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
                 required: ["symbol"]
             )
         ) { arguments in
-            await handler.getTechnicalIndicators(arguments: arguments)
+            nonisolated(unsafe) let result = await handler.getTechnicalIndicators(arguments: arguments)
+            return result
         })
         
         // Chart patterns tool
@@ -141,7 +145,8 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
                 required: ["symbol"]
             )
         ) { arguments in
-            await handler.detectChartPatterns(arguments: arguments)
+            nonisolated(unsafe) let result = await handler.detectChartPatterns(arguments: arguments)
+            return result
         })
         
         // Multi-timeframe analysis tool
@@ -204,7 +209,8 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
                 required: ["symbol"]
             )
         ) { arguments in
-            await handler.getSupportResistance(arguments: arguments)
+            nonisolated(unsafe) let result = await handler.getSupportResistance(arguments: arguments)
+            return result
         })
         
         // Full analysis tool
@@ -229,7 +235,8 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
                 required: ["symbol"]
             )
         ) { arguments in
-            await handler.getFullAnalysis(arguments: arguments)
+            nonisolated(unsafe) let result = await handler.getFullAnalysis(arguments: arguments)
+            return result
         })
     }
 }
@@ -347,7 +354,7 @@ actor CryptoAnalysisHandler {
         }
     }
     
-    func getMultiTimeframeAnalysis(arguments: sending [String: Any]) async -> sending [String: Any] {
+    nonisolated func getMultiTimeframeAnalysis(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let symbol = arguments["symbol"] as? String else {
             return ["error": "Symbol is required"]
         }
@@ -392,7 +399,7 @@ actor CryptoAnalysisHandler {
         ]
     }
     
-    func getTradingSignals(arguments: sending [String: Any]) async -> sending [String: Any] {
+    nonisolated func getTradingSignals(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let symbol = arguments["symbol"] as? String else {
             return ["error": "Symbol is required"]
         }
@@ -543,7 +550,7 @@ actor CryptoAnalysisHandler {
     
     // MARK: - Helper Methods
     
-    private func generateTradingSignals(
+    nonisolated private func generateTradingSignals(
         indicators: [IndicatorResult],
         patterns: [ChartPattern],
         levels: [SupportResistanceLevel],
@@ -615,7 +622,7 @@ actor CryptoAnalysisHandler {
         ]
     }
     
-    private func generateMultiTimeframeSummary(_ timeframeResults: [String: [String: Any]]) -> String {
+    nonisolated private func generateMultiTimeframeSummary(_ timeframeResults: [String: [String: Any]]) -> String {
         let timeframes = timeframeResults.keys.sorted()
         let summary = "Multi-timeframe analysis shows: "
         

@@ -4,6 +4,10 @@
 
 # CryptoAnalysisMCP v1.3 🚀
 
+[![Licence](https://img.shields.io/github/license/M-Pineapple/CryptoAnalysisMCP?label=Licence)](LICENSE)
+[![Swift](https://img.shields.io/badge/Swift-6.1-F05138?logo=swift&logoColor=white)](https://swift.org)
+[![Stars](https://img.shields.io/github/stars/M-Pineapple/CryptoAnalysisMCP)](https://github.com/M-Pineapple/CryptoAnalysisMCP/stargazers)
+
 **Supports 7+ MILLION tokens through DexPaprika integration!** 🎉
 
 A Model Context Protocol (MCP) server for comprehensive cryptocurrency technical analysis. Built with Swift, it provides real-time price data, technical indicators, chart pattern detection, and trading signals for over 7 million cryptocurrencies - from Bitcoin to the newest meme coin on any DEX!
@@ -662,6 +666,16 @@ Your support helps me:
 * Explore new indicators and analysis techniques
 
 Thank you for considering supporting my work! 🙏
+
+## More MCP servers by M-Pineapple
+
+- [Claude Project Coordinator](https://github.com/M-Pineapple/Claude-Project-Coordinator). Local Swift desk for tracking Xcode projects and a knowledge base.
+- [Warp Command Runner](https://github.com/M-Pineapple/warp-command-runner). Run terminal commands from any MCP host into Warp.
+- [Msty Admin MCP](https://github.com/M-Pineapple/msty-admin-mcp). Administer Msty Studio from an MCP client.
+- [Member Berries](https://github.com/M-Pineapple/member-berries-apple-mcp). Calendar, Notes and Reminders on macOS with a local day memory.
+- [SeaShell](https://github.com/M-Pineapple/seashell). Bridge Wave Terminal, Claude Desktop and Claude Code sessions.
+- [TextEdit MCP](https://github.com/M-Pineapple/TextEdit-MCP). Create RTF documents for macOS TextEdit.
+- [HubSpot Auditor](https://github.com/M-Pineapple/hubspot-auditor). Read-only scored audit of a HubSpot portal.
 
 ## Support
 

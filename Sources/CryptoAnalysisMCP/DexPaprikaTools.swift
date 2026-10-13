@@ -24,7 +24,8 @@ extension CryptoAnalysisMCP {
                 required: ["symbol"]
             )
         ) { arguments in
-            await handler.getTokenLiquidity(arguments: arguments)
+            nonisolated(unsafe) let result = await handler.getTokenLiquidity(arguments: arguments)
+            return result
         })
         
         // MARK: - Search Tokens by Network
@@ -49,7 +50,8 @@ extension CryptoAnalysisMCP {
                 required: ["network"]
             )
         ) { arguments in
-            await handler.searchTokensByNetwork(arguments: arguments)
+            nonisolated(unsafe) let result = await handler.searchTokensByNetwork(arguments: arguments)
+            return result
         })
         
         // MARK: - Compare DEX Prices
@@ -70,7 +72,8 @@ extension CryptoAnalysisMCP {
                 required: ["symbol", "network"]
             )
         ) { arguments in
-            await handler.compareDexPrices(arguments: arguments)
+            nonisolated(unsafe) let result = await handler.compareDexPrices(arguments: arguments)
+            return result
         })
         
         // MARK: - Get Network Pools
@@ -95,7 +98,8 @@ extension CryptoAnalysisMCP {
                 required: ["network"]
             )
         ) { arguments in
-            await handler.getNetworkPools(arguments: arguments)
+            nonisolated(unsafe) let result = await handler.getNetworkPools(arguments: arguments)
+            return result
         })
         
         // MARK: - Get DEX Info
@@ -112,7 +116,8 @@ extension CryptoAnalysisMCP {
                 required: ["network"]
             )
         ) { arguments in
-            await handler.getDexInfo(arguments: arguments)
+            nonisolated(unsafe) let result = await handler.getDexInfo(arguments: arguments)
+            return result
         })
         
         // MARK: - Get Pool Analytics
@@ -133,7 +138,8 @@ extension CryptoAnalysisMCP {
                 required: ["network", "pool_address"]
             )
         ) { arguments in
-            await handler.getPoolAnalytics(arguments: arguments)
+            nonisolated(unsafe) let result = await handler.getPoolAnalytics(arguments: arguments)
+            return result
         })
         
         // MARK: - Get Pool OHLCV
@@ -166,7 +172,8 @@ extension CryptoAnalysisMCP {
                 required: ["network", "pool_address", "start_date"]
             )
         ) { arguments in
-            await handler.getPoolOHLCV(arguments: arguments)
+            nonisolated(unsafe) let result = await handler.getPoolOHLCV(arguments: arguments)
+            return result
         })
         
         // MARK: - Get Available Networks
@@ -178,7 +185,8 @@ extension CryptoAnalysisMCP {
                 required: []
             )
         ) { arguments in
-            await handler.getAvailableNetworks(arguments: arguments)
+            nonisolated(unsafe) let result = await handler.getAvailableNetworks(arguments: arguments)
+            return result
         })
         
         // MARK: - Advanced Token Search
@@ -207,7 +215,8 @@ extension CryptoAnalysisMCP {
                 required: ["query"]
             )
         ) { arguments in
-            await handler.searchTokensAdvanced(arguments: arguments)
+            nonisolated(unsafe) let result = await handler.searchTokensAdvanced(arguments: arguments)
+            return result
         })
     }
 }

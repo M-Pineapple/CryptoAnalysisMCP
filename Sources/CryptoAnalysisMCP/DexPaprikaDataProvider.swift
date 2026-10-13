@@ -1,5 +1,8 @@
 import Foundation
 import Logging
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// Provides cryptocurrency data from DexPaprika API - 7+ million tokens!
 /// NO API KEY REQUIRED - Completely free access

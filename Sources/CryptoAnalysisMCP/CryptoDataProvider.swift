@@ -1,5 +1,8 @@
 import Foundation
 import Logging
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// Provides cryptocurrency data from various sources
 actor CryptoDataProvider: DataProvider {

@@ -1,5 +1,6 @@
 import Foundation
 import Logging
+import StdioShims
 
 // MARK: - No-op Logger for production
 public struct SwiftLogNoOpLogHandler: LogHandler {
@@ -261,8 +262,8 @@ class MCPServer {
             logger.info("📡 Listening on STDIO...")
         }
         
-        // Set stdin to line buffering mode
-        setbuf(stdin, nil)
+        // Pipes are fully buffered. MCP needs each JSON line to arrive immediately.
+        crypto_mcp_unbuffer_stdio()
         
         // Main event loop - don't send anything until we receive a request
         while true {
@@ -420,7 +421,6 @@ class MCPServer {
             
             if let jsonString = String(data: data, encoding: .utf8) {
                 print(jsonString)
-                fflush(stdout)
             }
         } catch {
             if debugMode {

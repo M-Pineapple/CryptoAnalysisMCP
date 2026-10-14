@@ -5,7 +5,7 @@ import Logging
 @main
 struct CryptoAnalysisMCP: AsyncParsableCommand {
     /// Single source of truth for the server version.
-    static let serverVersion = "1.3.1"
+    static let serverVersion = "1.3.2"
 
     static let configuration = CommandConfiguration(
         commandName: "crypto-analysis-mcp",

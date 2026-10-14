@@ -8,6 +8,38 @@
 [![Swift](https://img.shields.io/badge/Swift-6.1-F05138?logo=swift&logoColor=white)](https://swift.org)
 [![Stars](https://img.shields.io/github/stars/M-Pineapple/CryptoAnalysisMCP)](https://github.com/M-Pineapple/CryptoAnalysisMCP/stargazers)
 
+**Ask your MCP client about a coin. Get RSI, support/resistance and trading signals back in one call.**
+
+<div align="center">
+  <img src="docs/demo-get-full-analysis.gif" alt="Simulated MCP client walkthrough: a request for a full BTC analysis returns RSI, support/resistance levels and a HOLD signal" width="880">
+  <br>
+  <sub>Simulated walkthrough of <code>get_full_analysis</code>. Values are illustrative. Live output uses current market data and the same fields (<code>RSI_14</code>, <code>support_resistance</code>, <code>overall_signal</code>).</sub>
+</div>
+
+## Quick start
+
+1. **Clone and build**
+   ```bash
+   git clone https://github.com/M-Pineapple/CryptoAnalysisMCP.git
+   cd CryptoAnalysisMCP
+   ./build-release.sh
+   ```
+2. **Point Claude Desktop at the binary** in `~/Library/Application Support/Claude/claude_desktop_config.json`
+   ```json
+   {
+     "mcpServers": {
+       "crypto-analysis": {
+         "command": "/path/to/CryptoAnalysisMCP/crypto-analysis-mcp"
+       }
+     }
+   }
+   ```
+3. **Restart Claude Desktop** and ask: `Give me a full analysis of BTC`
+
+Daily candles work on the free CoinPaprika tier. A free API key is recommended for technical analysis. Full setup, including the optional key, is in [Installation](#installation).
+
+**Not financial advice.** Indicators, levels and signals are computed from public market data. They are not a recommendation to buy, sell or hold. See the [Disclaimer](#%EF%B8%8F-disclaimer) and [DISCLAIMER.md](DISCLAIMER.md).
+
 **Supports 7+ MILLION tokens through DexPaprika integration!** 🎉
 
 A Model Context Protocol (MCP) server for comprehensive cryptocurrency technical analysis. Built with Swift, it provides real-time price data, technical indicators, chart pattern detection, and trading signals for over 7 million cryptocurrencies - from Bitcoin to the newest meme coin on any DEX!
@@ -654,6 +686,8 @@ If you encounter build errors:
 3. Update dependencies: `swift package update`
 
 ## 💖 Support This Project
+
+If this saves you time, a star helps others find it.
 
 If CryptoAnalysisMCP has helped enhance your crypto analysis workflow or saved you time with technical indicators, consider supporting its development:
 

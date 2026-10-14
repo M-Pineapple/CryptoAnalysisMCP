@@ -268,6 +268,8 @@ Plus, we love Swift! 🍍
 - Xcode 13+ (for development)
 - Claude Desktop
 
+> **macOS only.** CryptoAnalysisMCP is a Swift package for macOS (it uses Apple-only networking APIs) and is set up for Claude Desktop on macOS. It does not build or run on Linux or Windows.
+
 ## Installation
 
 ### Prerequisites

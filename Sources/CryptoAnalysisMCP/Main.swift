@@ -4,10 +4,13 @@ import Logging
 
 @main
 struct CryptoAnalysisMCP: AsyncParsableCommand {
+    /// Single source of truth for the server version.
+    static let serverVersion = "1.3.1"
+
     static let configuration = CommandConfiguration(
         commandName: "crypto-analysis-mcp",
         abstract: "A Model Context Protocol server for cryptocurrency technical analysis",
-        version: "1.3.0"
+        version: serverVersion
     )
     
     @Option(help: "Transport method")
@@ -38,7 +41,7 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
         }
         
         let logger = Logger(label: "CryptoAnalysisMCP")
-        logger.info("🚀 Starting Crypto Analysis MCP Server v1.3.0")
+        logger.info("🚀 Starting Crypto Analysis MCP Server v\(Self.serverVersion)")
 
         // --use-sdk is now a no-op (SDK is the default). Keep accepting it
         // for v1.2.x backward compatibility but warn so configs get cleaned
@@ -62,7 +65,7 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
             // safety valve; SimpleMCP itself is removed in v1.4.
             let server = MCPServer(
                 name: "crypto-analysis",
-                version: "1.3.0",
+                version: Self.serverVersion,
                 debugMode: debug
             )
             await registerTools(server: server, handler: analysisHandler)
@@ -71,7 +74,7 @@ struct CryptoAnalysisMCP: AsyncParsableCommand {
             await server.runStdio()
         } else {
             // Default path: official mcp-swift-sdk.
-            let bridge = MCPSDKBridge(name: "crypto-analysis", version: "1.3.0")
+            let bridge = MCPSDKBridge(name: "crypto-analysis", version: Self.serverVersion)
             await registerTools(server: bridge, handler: analysisHandler)
             await registerDexPaprikaTools(server: bridge, handler: analysisHandler)
             logger.info("✅ Registered crypto analysis tools via mcp-swift-sdk (default)")

@@ -7,6 +7,7 @@
 [![Licence](https://img.shields.io/github/license/M-Pineapple/CryptoAnalysisMCP?label=Licence)](LICENSE)
 [![Swift](https://img.shields.io/badge/Swift-6.1-F05138?logo=swift&logoColor=white)](https://swift.org)
 [![Stars](https://img.shields.io/github/stars/M-Pineapple/CryptoAnalysisMCP)](https://github.com/M-Pineapple/CryptoAnalysisMCP/stargazers)
+[![M-Pineapple/CryptoAnalysisMCP MCP server](https://glama.ai/mcp/servers/M-Pineapple/CryptoAnalysisMCP/badges/score.svg)](https://glama.ai/mcp/servers/M-Pineapple/CryptoAnalysisMCP)
 
 **Ask your MCP client about a coin. Get RSI, support/resistance and trading signals back in one call.**
 

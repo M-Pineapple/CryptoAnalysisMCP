@@ -262,7 +262,9 @@ class MCPServer {
         }
         
         // Set stdin to line buffering mode
+        #if !os(Linux)
         setbuf(stdin, nil)
+        #endif
         
         // Main event loop - don't send anything until we receive a request
         while true {
@@ -420,7 +422,11 @@ class MCPServer {
             
             if let jsonString = String(data: data, encoding: .utf8) {
                 print(jsonString)
+                #if os(Linux)
+                fflush(nil)
+                #else
                 fflush(stdout)
+                #endif
             }
         } catch {
             if debugMode {

@@ -264,7 +264,7 @@ actor CryptoAnalysisHandler {
     
     // MARK: - Tool Implementation Methods
     
-    func getCurrentPrice(arguments: sending [String: Any]) async -> sending [String: Any] {
+    nonisolated func getCurrentPrice(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let symbol = arguments["symbol"] as? String else {
             return ["error": "Symbol is required"]
         }
@@ -279,7 +279,7 @@ actor CryptoAnalysisHandler {
         }
     }
 
-    func getTechnicalIndicators(arguments: sending [String: Any]) async -> sending [String: Any] {
+    nonisolated func getTechnicalIndicators(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let symbol = arguments["symbol"] as? String else {
             return ["error": "Symbol is required"]
         }
@@ -315,7 +315,7 @@ actor CryptoAnalysisHandler {
         }
     }
     
-    func detectChartPatterns(arguments: sending [String: Any]) async -> sending [String: Any] {
+    nonisolated func detectChartPatterns(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let symbol = arguments["symbol"] as? String else {
             return ["error": "Symbol is required"]
         }
@@ -350,7 +350,7 @@ actor CryptoAnalysisHandler {
         }
     }
     
-    func getMultiTimeframeAnalysis(arguments: sending [String: Any]) async -> sending [String: Any] {
+    nonisolated func getMultiTimeframeAnalysis(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let symbol = arguments["symbol"] as? String else {
             return ["error": "Symbol is required"]
         }
@@ -395,7 +395,7 @@ actor CryptoAnalysisHandler {
         ]
     }
     
-    func getTradingSignals(arguments: sending [String: Any]) async -> sending [String: Any] {
+    nonisolated func getTradingSignals(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let symbol = arguments["symbol"] as? String else {
             return ["error": "Symbol is required"]
         }
@@ -415,29 +415,25 @@ actor CryptoAnalysisHandler {
             let patterns = await patternRecognizer.detectPatterns(data: data)
             let levels = await supportResistanceAnalyzer.findKeyLevels(data: data)
             
-            let signals = await generateTradingSignals(
+            // The result dictionary is not Sendable. Build it outside this
+            // actor so the `sending` return does not capture actor-isolated state.
+            return await tradingSignalsJSON(
+                symbol: symbol.uppercased(),
+                timeframe: timeframe,
+                riskLevel: riskLevel,
                 indicators: indicators,
                 patterns: patterns,
                 levels: levels,
                 currentPrice: currentPrice,
-                riskLevel: riskLevel
+                analyzer: technicalAnalyzer
             )
-            
-            return [
-                "symbol": symbol.uppercased(),
-                "timeframe": timeframe.rawValue,
-                "risk_level": riskLevel.rawValue,
-                "current_price": currentPrice.price,
-                "timestamp": ISO8601DateFormatter().string(from: Date()),
-                "signals": signals
-            ]
         } catch {
             logger.error("Failed to generate signals: \(error)")
             return ["error": error.localizedDescription]
         }
     }
     
-    func getSupportResistance(arguments: sending [String: Any]) async -> sending [String: Any] {
+    nonisolated func getSupportResistance(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let symbol = arguments["symbol"] as? String else {
             return ["error": "Symbol is required"]
         }
@@ -454,23 +450,20 @@ actor CryptoAnalysisHandler {
             let levels = await supportResistanceAnalyzer.findKeyLevels(data: data, timeframe: timeframe)
             let currentPrice = try await dataProvider.getCurrentPrice(symbol: symbol.uppercased())
             
-            return [
-                "symbol": symbol.uppercased(),
-                "timeframe": timeframe.rawValue,
-                "current_price": currentPrice.price,
-                "timestamp": ISO8601DateFormatter().string(from: Date()),
-                "support_levels": levels.filter { $0.type == .support }.map(formatSupportResistance),
-                "resistance_levels": levels.filter { $0.type == .resistance }.map(formatSupportResistance),
-                "nearest_support": findNearestLevel(levels.filter { $0.type == .support }, to: currentPrice.price) as Any,
-                "nearest_resistance": findNearestLevel(levels.filter { $0.type == .resistance }, to: currentPrice.price) as Any
-            ]
+            return supportResistanceJSON(
+                symbol: symbol.uppercased(),
+                timeframeRaw: timeframe.rawValue,
+                currentPrice: currentPrice.price,
+                levels: levels,
+                timestamp: ISO8601DateFormatter().string(from: Date())
+            )
         } catch {
             logger.error("Failed to find levels: \(error)")
             return ["error": error.localizedDescription]
         }
     }
     
-    func getFullAnalysis(arguments: sending [String: Any]) async -> sending [String: Any] {
+    nonisolated func getFullAnalysis(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let symbol = arguments["symbol"] as? String else {
             return ["error": "Symbol is required"]
         }
@@ -479,11 +472,11 @@ actor CryptoAnalysisHandler {
         let riskLevel = parseRiskLevel(arguments["risk_level"] as? String)
         let cacheKey = "\(symbol.uppercased())_\(timeframe.rawValue)_\(riskLevel.rawValue)"
         
-        // Check cache
-        if let cached = analysisCache[cacheKey],
-           Date().timeIntervalSince(cached.timestamp) < cacheTimeout {
+        // Check cache. The cache stays on the actor. This method is
+        // nonisolated so its JSON result can cross into the tool closure.
+        if let cached = await cachedAnalysis(for: cacheKey) {
             logger.info("Returning cached analysis for \(symbol)")
-            return formatAnalysisResult(cached.data)
+            return formatAnalysisResult(cached)
         }
         
         do {
@@ -533,7 +526,7 @@ actor CryptoAnalysisHandler {
             )
             
             // Cache the result
-            analysisCache[cacheKey] = (analysisResult, Date())
+            await storeAnalysis(analysisResult, for: cacheKey)
             
             logger.info("Completed full analysis for \(symbol)")
             
@@ -546,7 +539,58 @@ actor CryptoAnalysisHandler {
     
     // MARK: - Helper Methods
     
-    private func generateTradingSignals(
+    /// JSON body for `getTradingSignals`, built off the actor so Linux Swift 6
+    /// can return it as `sending`.
+    private nonisolated func tradingSignalsJSON(
+        symbol: String,
+        timeframe: Timeframe,
+        riskLevel: RiskLevel,
+        indicators: [IndicatorResult],
+        patterns: [ChartPattern],
+        levels: [SupportResistanceLevel],
+        currentPrice: PriceData,
+        analyzer: TechnicalAnalyzer
+    ) async -> sending [String: Any] {
+        let signals = await generateTradingSignals(
+            analyzer: analyzer,
+            indicators: indicators,
+            patterns: patterns,
+            levels: levels,
+            currentPrice: currentPrice,
+            riskLevel: riskLevel
+        )
+        return [
+            "symbol": symbol,
+            "timeframe": timeframe.rawValue,
+            "risk_level": riskLevel.rawValue,
+            "current_price": currentPrice.price,
+            "timestamp": ISO8601DateFormatter().string(from: Date()),
+            "signals": signals
+        ]
+    }
+
+    /// JSON body for `getSupportResistance`, built off the actor.
+    private nonisolated func supportResistanceJSON(
+        symbol: String,
+        timeframeRaw: String,
+        currentPrice: Double,
+        levels: [SupportResistanceLevel],
+        timestamp: String
+    ) -> sending [String: Any] {
+        [
+            "symbol": symbol,
+            "timeframe": timeframeRaw,
+            "current_price": currentPrice,
+            "timestamp": timestamp,
+            "support_levels": levels.filter { $0.type == .support }.map(formatSupportResistance),
+            "resistance_levels": levels.filter { $0.type == .resistance }.map(formatSupportResistance),
+            "nearest_support": findNearestLevel(levels.filter { $0.type == .support }, to: currentPrice) as Any,
+            "nearest_resistance": findNearestLevel(levels.filter { $0.type == .resistance }, to: currentPrice) as Any
+        ]
+    }
+
+    private nonisolated func generateTradingSignals(
+        analyzer: TechnicalAnalyzer,
         indicators: [IndicatorResult],
         patterns: [ChartPattern],
         levels: [SupportResistanceLevel],
@@ -554,7 +598,7 @@ actor CryptoAnalysisHandler {
         riskLevel: RiskLevel
     ) async -> [String: Any] {
         
-        let (indicatorSignal, indicatorConfidence) = await technicalAnalyzer.generateOverallSignal(indicators: indicators)
+        let (indicatorSignal, indicatorConfidence) = await analyzer.generateOverallSignal(indicators: indicators)
         
         // Pattern-based signals
         let recentPatterns = patterns.filter { $0.confidence >= riskLevel.signalThreshold }
@@ -618,7 +662,19 @@ actor CryptoAnalysisHandler {
         ]
     }
     
-    private func generateMultiTimeframeSummary(_ timeframeResults: [String: [String: Any]]) -> String {
+    private func cachedAnalysis(for key: String) -> AnalysisResult? {
+        guard let cached = analysisCache[key],
+              Date().timeIntervalSince(cached.timestamp) < cacheTimeout else {
+            return nil
+        }
+        return cached.data
+    }
+
+    private func storeAnalysis(_ result: AnalysisResult, for key: String) {
+        analysisCache[key] = (result, Date())
+    }
+
+    private nonisolated func generateMultiTimeframeSummary(_ timeframeResults: [String: [String: Any]]) -> String {
         let timeframes = timeframeResults.keys.sorted()
         let summary = "Multi-timeframe analysis shows: "
         

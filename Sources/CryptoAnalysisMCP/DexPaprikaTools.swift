@@ -216,7 +216,7 @@ extension CryptoAnalysisMCP {
 
 extension CryptoAnalysisHandler {
     
-    func getTokenLiquidity(arguments: sending [String: Any]) async -> sending [String: Any] {
+    nonisolated func getTokenLiquidity(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let symbol = arguments["symbol"] as? String else {
             return ["error": "Symbol is required"]
         }
@@ -283,7 +283,7 @@ extension CryptoAnalysisHandler {
         }
     }
     
-    func searchTokensByNetwork(arguments: sending [String: Any]) async -> sending [String: Any] {
+    nonisolated func searchTokensByNetwork(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let network = arguments["network"] as? String else {
             return ["error": "Network is required"]
         }
@@ -370,7 +370,7 @@ extension CryptoAnalysisHandler {
         }
     }
     
-    func compareDexPrices(arguments: sending [String: Any]) async -> sending [String: Any] {
+    nonisolated func compareDexPrices(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let symbol = arguments["symbol"] as? String,
               let network = arguments["network"] as? String else {
             return ["error": "Both symbol and network are required"]
@@ -439,7 +439,7 @@ extension CryptoAnalysisHandler {
         }
     }
     
-    func getNetworkPools(arguments: sending [String: Any]) async -> sending [String: Any] {
+    nonisolated func getNetworkPools(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let network = arguments["network"] as? String else {
             return ["error": "Network is required"]
         }
@@ -485,7 +485,7 @@ extension CryptoAnalysisHandler {
         }
     }
     
-    func getDexInfo(arguments: sending [String: Any]) async -> sending [String: Any] {
+    nonisolated func getDexInfo(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let network = arguments["network"] as? String else {
             return ["error": "Network is required"]
         }
@@ -516,7 +516,7 @@ extension CryptoAnalysisHandler {
         }
     }
     
-    func getPoolAnalytics(arguments: sending [String: Any]) async -> sending [String: Any] {
+    nonisolated func getPoolAnalytics(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let network = arguments["network"] as? String,
               let poolAddress = arguments["pool_address"] as? String else {
             return ["error": "Both network and pool_address are required"]
@@ -576,7 +576,7 @@ extension CryptoAnalysisHandler {
         }
     }
     
-    func getPoolOHLCV(arguments: sending [String: Any]) async -> sending [String: Any] {
+    nonisolated func getPoolOHLCV(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let network = arguments["network"] as? String,
               let poolAddress = arguments["pool_address"] as? String,
               let startDate = arguments["start_date"] as? String else {
@@ -638,7 +638,7 @@ extension CryptoAnalysisHandler {
         }
     }
     
-    func getAvailableNetworks(arguments: sending [String: Any]) async -> sending [String: Any] {
+    nonisolated func getAvailableNetworks(arguments: sending [String: Any]) async -> sending [String: Any] {
         do {
             let dexProvider = await dexPaprikaProvider
             let networks = try await dexProvider.getNetworks()
@@ -665,7 +665,7 @@ extension CryptoAnalysisHandler {
         }
     }
     
-    func searchTokensAdvanced(arguments: sending [String: Any]) async -> sending [String: Any] {
+    nonisolated func searchTokensAdvanced(arguments: sending [String: Any]) async -> sending [String: Any] {
         guard let query = arguments["query"] as? String else {
             return ["error": "Query is required"]
         }

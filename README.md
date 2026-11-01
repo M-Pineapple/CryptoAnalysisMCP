@@ -706,7 +706,7 @@ Thank you for considering supporting my work! 🙏
 
 ## More MCP servers by M-Pineapple
 
-- [Claude Project Coordinator](https://github.com/M-Pineapple/Claude-Project-Coordinator). Local Swift desk for tracking Xcode projects and a knowledge base.
+- [Dev Project Coordinator](https://github.com/M-Pineapple/Dev-Project-Coordinator). Local desk for AI agents to track coding and non-coding projects, with Analytics and Kanban views.
 - [Warp Command Runner](https://github.com/M-Pineapple/warp-command-runner). Run terminal commands from any MCP host into Warp.
 - [Msty Admin MCP](https://github.com/M-Pineapple/msty-admin-mcp). Administer Msty Studio from an MCP client.
 - [Member Berries](https://github.com/M-Pineapple/member-berries-apple-mcp). Calendar, Notes and Reminders on macOS with a local day memory.
